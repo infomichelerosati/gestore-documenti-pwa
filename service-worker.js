@@ -1,14 +1,11 @@
 // service-worker.js
 
-// Aumentiamo la versione della cache per forzare l'aggiornamento
-const CACHE_NAME = 'gestore-documenti-cache-v3';
-
-// Definiamo i file fondamentali dell' "app shell" da salvare subito
+// Versione della cache incrementata a v4 per forzare l'aggiornamento
+const CACHE_NAME = 'gestore-documenti-cache-v4';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json'
-  // Le librerie esterne verranno aggiunte alla cache dinamicamente al primo caricamento
 ];
 
 // Evento di installazione: memorizza nella cache i file principali dell'app.
@@ -16,7 +13,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache v3 aperta, aggiungo i file principali.');
+        console.log('Cache v4 aperta, aggiungo i file principali.');
         return cache.addAll(urlsToCache);
       })
       .then(() => self.skipWaiting()) // Forza l'attivazione del nuovo service worker
@@ -40,30 +37,29 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Evento di fetch: intercetta tutte le richieste di rete con una strategia "Network falling back to cache".
+// Evento di fetch: Utilizza la strategia "Stale-While-Revalidate".
 self.addEventListener('fetch', event => {
-  // Ignora richieste non-GET
+  // Ignora richieste che non sono di tipo GET
   if (event.request.method !== 'GET') {
     return;
   }
 
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
-      // 1. Prova prima la rete
-      return fetch(event.request)
-        .then(networkResponse => {
-          // 2. Se la rete funziona, aggiorna la cache
-          // Per le richieste cross-origin non possiamo controllare lo status,
-          // quindi le salviamo direttamente. Questo è un compromesso necessario.
-          cache.put(event.request.url, networkResponse.clone());
-          // E restituisci la risposta dalla rete
+      // 1. Prova a trovare la risorsa nella cache
+      return cache.match(event.request).then(cachedResponse => {
+        // 2. In parallelo, fai una richiesta di rete per aggiornare la cache
+        const fetchPromise = fetch(event.request).then(networkResponse => {
+          // Se la richiesta di rete ha successo, aggiorna la cache
+          cache.put(event.request, networkResponse.clone());
           return networkResponse;
-        })
-        .catch(() => {
-          // 3. Se la rete fallisce, cerca nella cache
-          console.log(`Fetch fallito per ${event.request.url}; cerco nella cache.`);
-          return cache.match(event.request.url);
         });
+
+        // 3. Restituisci subito la risposta dalla cache se c'è,
+        // altrimenti attendi la risposta dalla rete.
+        // L'aggiornamento della cache avverrà in background senza bloccare l'utente.
+        return cachedResponse || fetchPromise;
+      });
     })
   );
 });
