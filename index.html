@@ -35,19 +35,8 @@
     <meta name="theme-color" content="#317EFB"/>
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/317EFB/ffffff?text=Docs">
     
-    <link rel="manifest" href='data:application/manifest+json,{
-        "name": "Gestore Documenti PWA",
-        "short_name": "GestoreDoc",
-        "start_url": ".",
-        "display": "fullscreen",
-        "background_color": "#f3f4f6",
-        "theme_color": "#317EFB",
-        "description": "Un semplice gestore di documenti PWA per organizzarli e ricercarli.",
-        "icons": [
-            { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192" },
-            { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512" }
-        ]
-    }'>
+    <!-- Collegamento al Web App Manifest esterno -->
+    <link rel="manifest" href="manifest.json">
 
     <style>
         html.dark { color-scheme: dark; }
@@ -358,6 +347,20 @@
     </div>
 
     <script>
+    // --- Service Worker Registration ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Il percorso './service-worker.js' è relativo alla posizione di index.html
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registrato con successo:', registration);
+          })
+          .catch(err => {
+            console.error('Registrazione ServiceWorker fallita:', err);
+          });
+      });
+    }
+
     // --- PWA Install ---
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
