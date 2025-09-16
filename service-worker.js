@@ -1,13 +1,14 @@
 // service-worker.js
 
 // Aumentiamo la versione della cache per forzare l'aggiornamento
-const CACHE_NAME = 'gestore-documenti-cache-v2';
+const CACHE_NAME = 'gestore-documenti-cache-v3';
 
 // Definiamo i file fondamentali dell' "app shell" da salvare subito
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json'
+  // Le librerie esterne verranno aggiunte alla cache dinamicamente al primo caricamento
 ];
 
 // Evento di installazione: memorizza nella cache i file principali dell'app.
@@ -15,46 +16,14 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Cache aperta, aggiungo i file principali.');
+        console.log('Cache v3 aperta, aggiungo i file principali.');
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting()) // Forza l'attivazione del nuovo service worker
   );
 });
 
-// Evento di fetch: intercetta tutte le richieste di rete.
-self.addEventListener('fetch', event => {
-  // Ignora le richieste che non sono di tipo GET (es. POST)
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  event.respondWith(
-    // Strategia: Network falling back to Cache
-    fetch(event.request)
-      .then(networkResponse => {
-        // Se la richiesta di rete ha successo, la usiamo
-        // e ne salviamo una copia nella cache per il futuro.
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME)
-          .then(cache => {
-            // Salva in cache solo se la risposta è valida
-            if(networkResponse.status === 200) {
-              cache.put(event.request, responseToCache);
-            }
-          });
-        return networkResponse;
-      })
-      .catch(() => {
-        // Se la richiesta di rete fallisce (es. l'utente è offline),
-        // proviamo a vedere se abbiamo una risposta salvata nella cache.
-        console.log(`Fetch fallito per ${event.request.url}; cerco nella cache.`);
-        return caches.match(event.request);
-      })
-  );
-});
-
-
-// Evento di attivazione: pulisce le vecchie cache non più necessarie.
+// Evento di attivazione: pulisce le vecchie cache e prende il controllo della pagina.
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -67,6 +36,34 @@ self.addEventListener('activate', event => {
           }
         })
       );
+    }).then(() => self.clients.claim()) // Prende il controllo immediato
+  );
+});
+
+// Evento di fetch: intercetta tutte le richieste di rete con una strategia "Network falling back to cache".
+self.addEventListener('fetch', event => {
+  // Ignora richieste non-GET
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  event.respondWith(
+    caches.open(CACHE_NAME).then(cache => {
+      // 1. Prova prima la rete
+      return fetch(event.request)
+        .then(networkResponse => {
+          // 2. Se la rete funziona, aggiorna la cache
+          // Per le richieste cross-origin non possiamo controllare lo status,
+          // quindi le salviamo direttamente. Questo è un compromesso necessario.
+          cache.put(event.request.url, networkResponse.clone());
+          // E restituisci la risposta dalla rete
+          return networkResponse;
+        })
+        .catch(() => {
+          // 3. Se la rete fallisce, cerca nella cache
+          console.log(`Fetch fallito per ${event.request.url}; cerco nella cache.`);
+          return cache.match(event.request.url);
+        });
     })
   );
 });
