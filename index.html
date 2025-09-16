@@ -14,7 +14,7 @@
       }
     </script>
     
-    <!-- Icone Lucide (URL aggiornato a un CDN più stabile e con versione specifica) -->
+    <!-- Icone Lucide -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js"></script>
 
     <!-- Libreria JSZip per gestire file .zip -->
@@ -23,7 +23,7 @@
     <!-- Libreria Tesseract.js per OCR client-side -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
 
-    <!-- Libreria PDF.js per anteprime PDF (versione aggiornata) -->
+    <!-- Libreria PDF.js per anteprime PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <!-- Font Inter da Google Fonts -->
@@ -35,7 +35,7 @@
     <meta name="theme-color" content="#317EFB"/>
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/317EFB/ffffff?text=Docs">
     
-    <!-- Collegamento al Web App Manifest esterno -->
+    <!-- Collegamento al Manifest esterno -->
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -347,21 +347,7 @@
     </div>
 
     <script>
-    // --- Service Worker Registration ---
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        // Il percorso './service-worker.js' è relativo alla posizione di index.html
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registrato con successo:', registration);
-          })
-          .catch(err => {
-            console.error('Registrazione ServiceWorker fallita:', err);
-          });
-      });
-    }
-
-    // --- PWA Install ---
+    // --- PWA Install & Service Worker Registration ---
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -371,17 +357,52 @@
     document.getElementById('installBtn').addEventListener('click', () => {
         if(deferredPrompt) deferredPrompt.prompt();
     });
+    
+    // Registra il Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(registration => console.log('ServiceWorker registrato con successo:', registration))
+                .catch(error => console.log('Registrazione ServiceWorker fallita:', error));
+        });
+    }
+
+    // --- NUOVA Funzione per configurare PDF.js Worker in modo robusto ---
+    async function setupPdfJsWorker() {
+        if (window.pdfjsLib) {
+            try {
+                // L'URL del worker che il service worker ha già messo in cache
+                const workerUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                
+                // Recuperiamo il contenuto dello script del worker
+                const response = await fetch(workerUrl);
+                const workerBlob = await response.blob();
+                
+                // Creiamo un URL locale (Blob URL) per lo script del worker
+                const blobUrl = URL.createObjectURL(workerBlob);
+                
+                // Usiamo l'URL locale. Questo è molto più robusto, specialmente su mobile.
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = blobUrl;
+                console.log('PDF.js worker configurato con successo usando un Blob URL.');
+
+            } catch (error) {
+                console.error('Errore critico nella configurazione del worker PDF.js. Le anteprime potrebbero non funzionare.', error);
+                // Fallback al metodo originale nel caso il fetch fallisca (improbabile con il SW)
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+        } else {
+            console.warn("Attenzione: libreria PDF.js non caricata. Le funzionalità PDF e OCR non saranno disponibili.");
+        }
+    }
+
 
     // --- Funzione principale dell'applicazione ---
     function initializeApp() {
         console.log("VERSIONE POTENZIATA CARICATA - Avvio dell'app.");
         
         // --- Inizializzazione PDF.js Worker ---
-        if (window.pdfjsLib) {
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
-        } else {
-            console.warn("Attenzione: libreria PDF.js non caricata. Le funzionalità PDF e OCR non saranno disponibili.");
-        }
+        // Chiamiamo la nuova funzione asincrona. Non bloccherà l'avvio del resto dell'app.
+        setupPdfJsWorker();
         
         // --- Variabili Globali ---
         const docListContainer = document.getElementById('document-list-container');
@@ -1091,13 +1112,22 @@
             docListContainer.appendChild(details);
         }
 
+        // --- NUOVA Funzione per renderizzare le anteprime PDF con fallback e logging migliorati ---
         async function renderPdfThumbnail(docId, fileData) {
             const canvas = document.getElementById(`pdf-canvas-${docId}`);
-            if (!canvas) return;
+            if (!canvas) {
+                console.log(`Canvas non trovato per doc ${docId}`);
+                return;
+            }
+            const container = canvas.parentElement;
 
             try {
-                const pdfjsLib = getPdfjsLib(); 
-                if (!pdfjsLib) return; 
+                console.log(`Inizio rendering anteprima per doc ${docId}`);
+                const pdfjsLib = getPdfjsLib();
+                if (!pdfjsLib) {
+                    console.error(`Libreria PDF.js non disponibile per doc ${docId}`);
+                    throw new Error("pdf.js lib non trovata");
+                }
 
                 const blob = dataURLtoBlob(fileData);
                 const arrayBuffer = await new Promise((resolve, reject) => {
@@ -1110,7 +1140,7 @@
                 const typedarray = new Uint8Array(arrayBuffer);
                 const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
                 const page = await pdf.getPage(1);
-                
+
                 const desiredHeight = 128;
                 const viewport = page.getViewport({ scale: 1 });
                 const scale = desiredHeight / viewport.height;
@@ -1121,12 +1151,19 @@
                 canvas.width = scaledViewport.width;
 
                 await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
+                console.log(`Anteprima per doc ${docId} renderizzata con successo.`);
 
             } catch (error) {
-                console.error(`Error rendering PDF preview for doc ${docId}:`, error);
-                const container = canvas.parentElement;
+                console.error(`ERRORE rendering anteprima PDF per doc ${docId}:`, error);
                 if (container) {
-                    container.innerHTML = `<i data-lucide="file-type-2" class="w-12 h-12 text-red-500"></i>`;
+                    // Forniamo un fallback più chiaro e un pulsante che funziona
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full text-center p-2">
+                            <i data-lucide="file-warning" class="w-8 h-8 text-amber-500"></i>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Anteprima fallita</p>
+                            <button class="preview-btn-fallback text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded mt-2" data-id="${docId}">Apri</button>
+                        </div>
+                    `;
                     lucide.createIcons();
                 }
             }
@@ -1134,18 +1171,19 @@
 
         function createDocGridItem(doc) {
             const card = document.createElement('div');
-            card.className = 'preview-btn bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer transition-transform transform hover:scale-105';
-            card.dataset.id = doc.id;
+            // Rimuovo preview-btn dalla card principale per evitare doppi click
+            card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col transition-transform transform hover:scale-105';
             
             let previewHTML = '';
             
             if (doc.fileType && doc.fileType.startsWith('image/')) {
-                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima di ${doc.displayName}"></div>`;
+                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer preview-btn" data-id="${doc.id}"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima di ${doc.displayName}"></div>`;
             } else if (doc.fileType === 'application/pdf') {
+                // Il contenitore dell'anteprima non è più cliccabile di per sé
                 previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
                 setTimeout(() => renderPdfThumbnail(doc.id, doc.fileData), 0);
             } else {
-                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
+                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center cursor-pointer preview-btn" data-id="${doc.id}"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
             }
 
             card.innerHTML = `
@@ -1592,7 +1630,8 @@
         });
         
         docListContainer.addEventListener('click', (e) => {
-            const previewBtn = e.target.closest('.preview-btn');
+            // Unifico il listener per tutti i pulsanti che aprono la modale di anteprima
+            const previewBtn = e.target.closest('.preview-btn, .preview-btn-fallback');
             const editBtn = e.target.closest('.edit-doc-btn');
             const attachmentLink = e.target.closest('.attachment-link');
             const tagLink = e.target.closest('.tag-link');
@@ -1849,9 +1888,8 @@
                     const errorMessage = `Errore: Impossibile caricare le seguenti librerie: ${missingLibs.join(', ')}`;
                     console.error(errorMessage);
                     
-                    // Mostra la modale di errore critico invece della vecchia notifica
                     document.getElementById('missing-libs-list').textContent = `Dettagli: ${missingLibs.join(', ')} non trovate.`;
-                    loadErrorModal.classList.remove('hidden');
+                    document.getElementById('load-error-modal').classList.remove('hidden');
                     lucide.createIcons(); 
                     document.getElementById('reload-page-btn').onclick = () => window.location.reload();
 
