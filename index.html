@@ -8,29 +8,17 @@
     <!-- Tailwind CSS per uno stile moderno e responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Configura Tailwind per usare la strategia 'class' per il dark mode
-      tailwind.config = {
-        darkMode: 'class'
-      }
+      tailwind.config = { darkMode: 'class' }
     </script>
     
     <!-- Icone Lucide -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js"></script>
 
-    <!-- Libreria JSZip per gestire file .zip -->
+    <!-- Librerie Esterne -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    
-    <!-- Libreria Tesseract.js per OCR client-side -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
-
-    <!-- Libreria PDF.js per anteprime PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-    <!-- NUOVE LIBRERIE PER ANTEPRIMA OFFICE -->
-    <!-- Libreria Docx-preview per anteprime Word (.docx) -->
     <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.js"></script>
-    
-    <!-- Libreria SheetJS (xlsx) per anteprime Excel (.xlsx) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <!-- Font Inter da Google Fonts -->
@@ -42,7 +30,7 @@
     <meta name="theme-color" content="#317EFB"/>
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/317EFB/ffffff?text=Docs">
     
-    <!-- Manifest della PWA incorporato direttamente (con migliorie) -->
+    <!-- Manifest della PWA incorporato -->
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Gestore Documenti PWA",
         "short_name": "GestoreDoc",
@@ -86,65 +74,24 @@
             height: 16px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .highlight-suggestion {
-            animation: pulse-bg 2s infinite;
-        }
-        @keyframes pulse-bg {
-            0% { background-color: inherit; }
-            50% { background-color: rgba(59, 130, 246, 0.1); }
-            100% { background-color: inherit; }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .highlight-suggestion { animation: pulse-bg 2s infinite; }
+        @keyframes pulse-bg { 0% { background-color: inherit; } 50% { background-color: rgba(59, 130, 246, 0.1); } 100% { background-color: inherit; } }
         .powered-by {
-            position: fixed;
-            top: 4px;
-            left: 50%;
-            font-size: 0.65rem;
-            font-weight: 500;
-            z-index: 50;
-            pointer-events: none;
-            animation: color-cycle 18s linear infinite, pulse-light 4s ease-in-out infinite;
-            text-shadow: 0 0 3px rgba(0,0,0,0.4);
-            background: transparent;
+            position: fixed; top: 4px; left: 50%; font-size: 0.65rem; font-weight: 500; z-index: 50;
+            pointer-events: none; animation: color-cycle 18s linear infinite, pulse-light 4s ease-in-out infinite;
+            text-shadow: 0 0 3px rgba(0,0,0,0.4); background: transparent;
         }
-        @keyframes color-cycle {
-            0%   { color: #ff8a80; } 16%  { color: #ffcf7d; } 33%  { color: #b9f6ca; } 50%  { color: #84ffff; }
-            67%  { color: #8c9eff; } 83%  { color: #f8bbd0; } 100% { color: #ff8a80; }
-        }
-        @keyframes pulse-light {
-            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
-            50%      { transform: translateX(-50%) scale(1.05); opacity: 1; }
-        }
-        /* Stili per anteprima excel */
-        .excel-preview-container {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: white;
-            padding: 1rem;
-            border-radius: 8px;
-        }
-        .excel-preview-container table {
-            border-collapse: collapse;
-            width: 100%;
-            font-size: 0.8rem;
-        }
-        .excel-preview-container th, .excel-preview-container td {
-            border: 1px solid #ddd;
-            padding: 4px 8px;
-            text-align: left;
-            color: #333;
-        }
-        .excel-preview-container th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
+        @keyframes color-cycle { 0% { color: #ff8a80; } 16% { color: #ffcf7d; } 33% { color: #b9f6ca; } 50% { color: #84ffff; } 67% { color: #8c9eff; } 83% { color: #f8bbd0; } 100% { color: #ff8a80; } }
+        @keyframes pulse-light { 0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; } 50% { transform: translateX(-50%) scale(1.05); opacity: 1; } }
+        .excel-preview-container { width: 100%; height: 100%; overflow: auto; background-color: white; padding: 1rem; border-radius: 8px; }
+        .excel-preview-container table { border-collapse: collapse; width: 100%; font-size: 0.8rem; }
+        .excel-preview-container th, .excel-preview-container td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; color: #333; }
+        .excel-preview-container th { background-color: #f2f2f2; font-weight: bold; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    <!-- Contenuto HTML (invariato) -->
     <div class="powered-by">Powered By Michele Rosati</div>
 
     <!-- Sidebar a scomparsa per i filtri -->
@@ -207,7 +154,6 @@
                         <i data-lucide="sun" class="w-6 h-6 block dark:hidden"></i>
                         <i data-lucide="moon" class="w-6 h-6 hidden dark:block"></i>
                     </button>
-                    <!-- Pulsante Fullscreen Aggiunto -->
                     <button id="fullscreen-btn" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
                         <i data-lucide="maximize" class="w-6 h-6 block"></i>
                         <i data-lucide="minimize" class="w-6 h-6 hidden"></i>
@@ -366,1627 +312,1209 @@
         <button id="reload-page-btn" class="bg-blue-600 hover:bg-blue-700 font-bold py-2 px-6 rounded-lg">Ricarica Pagina</button>
     </div>
 
+    <!-- ===================================================================== -->
+    <!-- NUOVA LOGICA JAVASCRIPT UNIFICATA E CORRETTA PER PWA                  -->
+    <!-- ===================================================================== -->
     <script>
-    // --- Funzione principale dell'applicazione ---
-    function initializeApp() {
-        console.log("App inizializzata.");
-        
-        // --- Inizializzazione PDF.js Worker ---
-        if (window.pdfjsLib) {
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
-        } else {
-            console.warn("Attenzione: libreria PDF.js non caricata.");
-        }
-        
-        const docListContainer = document.getElementById('document-list-container');
-        const emptyStateEl = document.getElementById('empty-state');
-        const searchInput = document.getElementById('search-input');
-        const sortSelect = document.getElementById('sort-select');
-        const addDocBtn = document.getElementById('add-doc-btn');
-        let currentFilter = {};
-        let activeTagFilter = null;
-        let db;
-        let docIdToDelete = null;
-        let editingDocId = null;
-        let attachmentsToAdd = [];
-        let currentPreviewDoc = null;
-        let currentView = localStorage.getItem('doc-view') || 'list';
-        let fullFilteredDocs = [];
-        let currentPage = 1;
-        let itemsPerPage = 10;
+    // Questo script ha una doppia funzione:
+    // 1. Se eseguito nel browser, registra il Service Worker e avvia l'app.
+    // 2. Se eseguito come Service Worker, imposta gli eventi di caching.
+    // Il controllo `self.clients` distingue i due contesti.
 
-        const docModal = document.getElementById('doc-modal');
-        const docForm = document.getElementById('doc-form');
-        const modalTitle = document.getElementById('modal-title');
-        const docIdInput = docForm['doc-id'];
-        const cancelBtn = document.getElementById('cancel-btn');
-        const fileInput = docForm['doc-file'];
-        const ocrBtn = document.getElementById('ocr-btn');
-        const ocrStatusEl = document.getElementById('ocr-status');
-        const currentFileNameEl = document.getElementById('current-file-name');
-        const attachmentsInput = docForm['doc-attachments'];
-        const attachmentsListEl = document.getElementById('attachments-list');
-        const categorySuggestions = document.getElementById('category-suggestions');
-        const subcategorySuggestions = document.getElementById('subcategory-suggestions');
-        const tagsSuggestions = document.getElementById('tags-suggestions');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const menuBtn = document.getElementById('menu-btn');
-        const filterTreeEl = document.getElementById('filter-tree');
-        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-        const resetFilterBtn = document.getElementById('reset-filter-btn');
-        const previewModal = document.getElementById('preview-modal');
-        const previewTitle = document.getElementById('preview-title');
-        const previewContent = document.getElementById('preview-content');
-        const previewAttachmentsBar = document.getElementById('preview-attachments-bar');
-        const closePreviewBtn = document.getElementById('close-preview-btn');
-        const printBtn = document.getElementById('print-btn');
-        const downloadBtn = document.getElementById('download-btn');
-        const editPreviewBtn = document.getElementById('edit-preview-btn');
-        const deletePreviewBtn = document.getElementById('delete-preview-btn');
-        const confirmDeleteModal = document.getElementById('confirm-delete-modal');
-        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-        const exportBtn = document.getElementById('export-data-btn');
-        const importBtn = document.getElementById('import-data-btn');
-        const importFileInput = document.getElementById('import-file-input');
-        const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const fullscreenBtn = document.getElementById('fullscreen-btn'); // Elemento Fullscreen
-        const viewListBtn = document.getElementById('view-list-btn');
-        const viewGridBtn = document.getElementById('view-grid-btn');
-        const statsTotalDocs = document.getElementById('stats-total-docs');
-        const statsTotalSize = document.getElementById('stats-total-size');
-        const itemsPerPageSelect = document.getElementById('items-per-page-select');
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        const loadErrorModal = document.getElementById('load-error-modal');
-        const fieldsToHighlight = [
-            docForm['doc-name'],
-            docForm['doc-year'],
-            docForm['doc-category'],
-            docForm['doc-subcategory'],
-            docForm['doc-details']
+    // Contesto SERVICE WORKER
+    if ('serviceWorker' in navigator && typeof self.clients === 'object') {
+        const CACHE_NAME = 'doc-manager-cache-v5'; // Versione cache incrementata
+        const URLS_TO_CACHE = [
+            './', // Memorizza l'index.html stesso
+            'https://cdn.tailwindcss.com',
+            'https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+            'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+            'https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
         ];
-        
-        const selectedTagsContainer = document.getElementById('selected-tags-container');
-        const docTagsInput = document.getElementById('doc-tags-input');
-        const availableTagsSection = document.getElementById('available-tags-section');
-        const availableTagsContainer = document.getElementById('available-tags-container');
-        const docTagsHiddenInput = document.getElementById('doc-tags');
-        const categoryInput = docForm['doc-category'];
 
-        let currentTagsSet = new Set();
-        let allKnownTags = new Set();
-        let categoryScopedTags = new Set();
-
-
-        function getPdfjsLib() {
-            if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-                return window.pdfjsLib;
-            } else {
-                console.error("Libreria PDF.js non caricata o non inizializzata correttamente.");
-                showSnackbar("Errore: la libreria per i PDF non è stata caricata.");
-                return null;
-            }
-        }
-
-        function initDB() {
-            const request = indexedDB.open("DocumentManagerDB_v3", 2);
-            request.onerror = e => console.error("DB Error:", e.target.errorCode);
-            request.onupgradeneeded = e => {
-                db = e.target.result;
-                let store;
-                if (!db.objectStoreNames.contains("documents")) {
-                    store = db.createObjectStore("documents", { keyPath: "id", autoIncrement: true });
-                    store.createIndex("year_category_subcategory", ["year", "category", "subcategory"], { unique: false });
-                } else {
-                    store = e.target.transaction.objectStore("documents");
-                }
-                
-                if (!store.indexNames.contains("contentHash")) {
-                    store.createIndex("contentHash", "contentHash", { unique: true });
-                }
-            };
-            request.onsuccess = e => {
-                db = e.target.result;
-                renderAll();
-            };
-        }
-
-        function renderAll() {
-            renderDocuments();
-            renderFilterTree();
-            updateDatalists();
-            renderStats();
-        }
-        
-        const Crud = {
-            save: (doc, showNotification = true) => {
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction("documents", "readwrite");
-                    tx.oncomplete = () => {
-                        if (showNotification) showSnackbar("Documento salvato!");
-                        closeModal(docModal);
-                        renderAll();
-                        resolve();
-                    };
-                    tx.onerror = (event) => {
-                        console.error("Errore transazione DB:", event.target.error);
-                        if (event.target.error.name === 'ConstraintError') {
-                            showSnackbar("Errore: un file con questo stesso contenuto esiste già.", true);
-                        }
-                        reject(event.target.error);
-                    };
-                    tx.objectStore("documents").put(doc);
-                });
-            },
-            delete: (docId) => {
-                const tx = db.transaction("documents", "readwrite");
-                tx.objectStore("documents").delete(docId);
-                tx.oncomplete = () => {
-                    showSnackbar("Documento eliminato.");
-                    currentPreviewDoc = null;
-                    renderAll();
-                    if(!previewModal.classList.contains('hidden')) closeModal(previewModal);
-                };
-            },
-            get: (docId, callback) => {
-                db.transaction("documents").objectStore("documents").get(parseInt(docId)).onsuccess = e => callback(e.target.result);
-            },
-            getAll: (callback) => {
-                db.transaction("documents").objectStore("documents").getAll().onsuccess = e => callback(e.target.result);
-            },
-            clear: (callback) => {
-                const tx = db.transaction("documents", "readwrite");
-                tx.objectStore("documents").clear();
-                tx.oncomplete = callback;
-            }
-        };
-        
-        function calculateSimilarity(s1, s2) {
-            let longer = s1;
-            let shorter = s2;
-            if (s1.length < s2.length) {
-                longer = s2;
-                shorter = s1;
-            }
-            const longerLength = longer.length;
-            if (longerLength === 0) {
-                return 1.0;
-            }
-            return (longerLength - levenshteinDistance(longer, shorter)) / parseFloat(longerLength);
-        }
-
-        function levenshteinDistance(s1, s2) {
-            s1 = s1.toLowerCase();
-            s2 = s2.toLowerCase();
-            const costs = [];
-            for (let i = 0; i <= s1.length; i++) {
-                let lastValue = i;
-                for (let j = 0; j <= s2.length; j++) {
-                    if (i == 0) {
-                        costs[j] = j;
-                    } else {
-                        if (j > 0) {
-                            let newValue = costs[j - 1];
-                            if (s1.charAt(i - 1) != s2.charAt(j - 1)) {
-                                newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                            }
-                            costs[j - 1] = lastValue;
-                            lastValue = newValue;
-                        }
-                    }
-                }
-                if (i > 0) costs[s2.length] = lastValue;
-            }
-            return costs[s2.length];
-        }
-        
-        function findBestMatchForWord(word, wordList) {
-            let bestScore = 0;
-            for (const ocrWord of wordList) {
-                const score = calculateSimilarity(word, ocrWord);
-                if (score > bestScore) {
-                    bestScore = score;
-                }
-            }
-            return bestScore;
-        }
-
-        function getMimeTypeFromName(fileName) {
-            if (!fileName || !fileName.includes('.')) return 'application/octet-stream';
-            const extension = fileName.split('.').pop().toLowerCase();
-            switch (extension) {
-                case 'jpg': case 'jpeg': return 'image/jpeg';
-                case 'png': return 'image/png';
-                case 'gif': return 'image/gif';
-                case 'webp': return 'image/webp';
-                case 'svg': return 'image/svg+xml';
-                case 'pdf': return 'application/pdf';
-                // Aggiungiamo i tipi MIME per i file di Office
-                case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                default: return 'application/octet-stream';
-            }
-        }
-
-        function getExistingCategoriesAndSubcategories() {
-            return new Promise(resolve => {
-                Crud.getAll(docs => {
-                    const existingCategories = new Set();
-                    const existingSubcategories = new Set();
-                    docs.forEach(doc => {
-                        if (doc.category) existingCategories.add(doc.category);
-                        if (doc.subcategory) existingSubcategories.add(doc.subcategory);
-                    });
-                    resolve({ existingCategories, existingSubcategories });
-                });
-            });
-        }
-
-        const dataURLtoBlob = (dataurl) => {
-            if (!dataurl || !dataurl.includes(',')) {
-                console.error("Invalid dataURL passed to dataURLtoBlob");
-                return null;
-            }
-            const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-                  bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while(n--){ u8arr[n] = bstr.charCodeAt(n); }
-            return new Blob([u8arr], {type:mime});
-        }
-
-        const readFileAsDataURL = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve({
-                    fileData: reader.result,
-                    fileName: file.name,
-                    fileType: file.type || getMimeTypeFromName(file.name) // Migliorato per robustezza
-                });
-                reader.onerror = () => {
-                    reject(new Error(`Impossibile leggere il file "${file.name}"`));
-                };
-                reader.readAsDataURL(file);
-            });
-        };
-
-        async function calculateFileHash(file) {
-            const buffer = await file.arrayBuffer();
-            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
-
-        function checkForDuplicate(hash) {
-            return new Promise((resolve, reject) => {
-                if (!db) return resolve(null);
-                const tx = db.transaction("documents", "readonly");
-                const store = tx.objectStore("documents");
-                const index = store.index("contentHash");
-                const request = index.get(hash);
-                request.onsuccess = () => resolve(request.result || null);
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        const getBase64Size = (base64) => {
-            if (!base64 || typeof base64 !== 'string') return 0;
-            const stringLength = base64.length - base64.indexOf(',');
-            const sizeInBytes = 4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
-            return sizeInBytes;
-        };
-
-        const formatBytes = (bytes, decimals = 2) => {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-        }
-
-        const highlightField = (element) => {
-            if (element && element.value) {
-                element.classList.add('highlight-suggestion');
-            }
-        };
-
-        const clearAllHighlights = () => {
-            fieldsToHighlight.forEach(field => field.classList.remove('highlight-suggestion'));
-        };
-
-        function parseFilenameForMetadata(filename) {
-            if (!filename) return;
-            const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
-            const nameInput = docForm['doc-name'];
-            if (!nameInput.value) {
-                nameInput.value = nameWithoutExt.replace(/[-_]/g, ' ');
-                highlightField(nameInput);
-            }
-            const yearInput = docForm['doc-year'];
-            if (!yearInput.value) {
-                const yearMatch = nameWithoutExt.match(/\b(19|20)\d{2}\b/);
-                if (yearMatch) {
-                    yearInput.value = yearMatch[0];
-                    highlightField(yearInput);
-                }
-            }
-            const categoryInput = docForm['doc-category'];
-            const subcategoryInput = docForm['doc-subcategory'];
-            if (!categoryInput.value) {
-                const parts = nameWithoutExt.replace(/\b(19|20)\d{2}\b/, '').split(/[-_ ]+/).filter(p => p.toLowerCase() !== 'fattura' && p.toLowerCase() !== 'bolletta');
-                if (parts.length > 0) {
-                    categoryInput.value = parts[0];
-                    highlightField(categoryInput);
-                }
-                if (parts.length > 1 && !subcategoryInput.value) {
-                    subcategoryInput.value = parts[1];
-                    highlightField(subcategoryInput);
-                }
-            }
-        }
-        
-        async function runOCR() {
-            const file = fileInput.files[0];
-            if (!file || (!file.type.startsWith('image/') && file.type !== 'application/pdf')) {
-                showSnackbar("Seleziona un file immagine o PDF per l'analisi OCR.");
-                return;
-            }
-
-            ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Inizializzazione OCR...</span>`;
-            ocrBtn.disabled = true;
-            
-            const worker = await Tesseract.createWorker('ita', 1, {
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        const progress = (m.progress * 100).toFixed(0);
-                        ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Analisi in corso (${progress}%)...</span>`;
-                    } else if (m.status === 'loading language model') {
-                         ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Caricamento modello lingua...</span>`;
-                    }
-                },
-            });
-
-            try {
-                let imageSource;
-                if (file.type.startsWith('image/')) {
-                    imageSource = file;
-                } else if (file.type === 'application/pdf') {
-                    ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Caricamento PDF...</span>`;
-                    const pdfjsLib = getPdfjsLib(); 
-                    if (!pdfjsLib) throw new Error("Libreria PDF non disponibile.");
-
-                    const arrayBuffer = await file.arrayBuffer();
-                    const typedarray = new Uint8Array(arrayBuffer);
-                    const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                    const page = await pdf.getPage(1);
-                    
-                    const viewport = page.getViewport({ scale: 2.0 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    imageSource = canvas;
-                }
-                
-                const { data: { text } } = await worker.recognize(imageSource);
-                await parseOCRText(text);
-                ocrStatusEl.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> <span>Analisi completata. Controlla i campi.</span>`;
-            } catch (error) {
-                console.error("OCR Error:", error);
-                ocrStatusEl.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i> <span class="text-left">Errore durante l'analisi.</span>`;
-            } finally {
-                await worker.terminate();
-                ocrBtn.disabled = false;
-                lucide.createIcons();
-            }
-        }
-
-        async function parseOCRText(text) {
-            if (!text) return;
-
-            const detailsInput = docForm['doc-details'];
-            let detailsFound = false; 
-
-            const setField = (element, value) => {
-                if (element && !element.value && value) {
-                    element.value = value.trim();
-                    highlightField(element);
-                }
-            };
-            
-            const appendToDetails = (label, value) => {
-                if (value) {
-                    detailsFound = true; 
-                    const cleanLabel = label.trim();
-                    const cleanValue = value.trim();
-                    const existingDetails = detailsInput.value;
-                    const labelRegex = new RegExp(`^${cleanLabel}:|\\n${cleanLabel}:`, 'm');
-                    if (!labelRegex.test(existingDetails)) {
-                        detailsInput.value += (existingDetails ? '\n' : '') + `${cleanLabel}: ${cleanValue}`;
-                        highlightField(detailsInput);
-                    }
-                }
-            };
-
-            const addTagFromOCR = (tag) => {
-                if (!tag) return;
-                const cleanedTag = tag.trim();
-                if (cleanedTag && !currentTagsSet.has(cleanedTag)) {
-                    currentTagsSet.add(cleanedTag);
-                    updateTagsUI();
-                    highlightField(selectedTagsContainer); 
-                }
-            };
-
-            const { existingCategories, existingSubcategories } = await getExistingCategoriesAndSubcategories();
-            const sortedCategories = [...existingCategories].sort((a, b) => b.length - a.length);
-            const sortedSubcategories = [...existingSubcategories].sort((a, b) => b.length - a.length);
-            const ocrWords = text.toLowerCase().replace(/[.,/#!$%\^&*;:{}=\-_`~()]/g, "").split(/\s+/).filter(Boolean);
-            const WORD_SIMILARITY_THRESHOLD = 0.8; 
-
-            if (!docForm['doc-category'].value) {
-                for (const category of sortedCategories) {
-                    const catWords = category.toLowerCase().split(' ');
-                    let allWordsFound = true;
-                    for (const catWord of catWords) {
-                        const bestMatchScore = findBestMatchForWord(catWord, ocrWords);
-                        if (bestMatchScore < WORD_SIMILARITY_THRESHOLD) {
-                            allWordsFound = false;
-                            break; 
-                        }
-                    }
-                    if (allWordsFound) {
-                        setField(docForm['doc-category'], category);
-                        break; 
-                    }
-                }
-            }
-
-            if (!docForm['doc-subcategory'].value) {
-                for (const subcategory of sortedSubcategories) {
-                    const subCatWords = subcategory.toLowerCase().split(' ');
-                    let allWordsFound = true;
-                    for (const subCatWord of subCatWords) {
-                        const bestMatchScore = findBestMatchForWord(subCatWord, ocrWords);
-                        if (bestMatchScore < WORD_SIMILARITY_THRESHOLD) {
-                            allWordsFound = false;
-                            break;
-                        }
-                    }
-                    if (allWordsFound) {
-                        setField(docForm['doc-subcategory'], subcategory);
-                        break; 
-                    }
-                }
-            }
-            
-            if (!docForm['doc-category'].value) {
-                const recognizers = [
-                    { name: 'Luce', keywords: /enel|servizio elettrico|e-distribuzione|a2a energia/i, cat: 'Bollette', sub: 'Luce' },
-                    { name: 'Gas', keywords: /enel energia|eni|plenitude|snam|italgas|a2a/i, cat: 'Bollette', sub: 'Gas' },
-                    { name: 'Acqua', keywords: /acea|acquedotto|publiacqua|acque/i, cat: 'Bollette', sub: 'Acqua' },
-                    { name: 'Telefonia', keywords: /tim|telecom|vodafone|wind|tre|iliad|fastweb|sky wifi/i, cat: 'Bollette', sub: 'Telefonia' },
-                    { name: 'Rifiuti', keywords: /tari|tassa sui rifiuti|azienda municipalizzata/i, cat: 'Tasse', sub: 'Rifiuti' },
-                    { name: 'Assicurazione', keywords: /allianz|generali|unipolsai|cattolica assicurazioni|reale mutuale/i, cat: 'Assicurazioni', sub: 'Polizza' },
-                    { name: 'Sanità', keywords: /referto|ricetta medica|asl|cup|azienda sanitaria|analisi/i, cat: 'Sanità', sub: 'Referto' },
-                    { name: 'Multe', keywords: /multa|sanzione amministrativa|verbale di accertamento|polizia locale/i, cat: 'Multe', sub: 'Violazione' },
-                    { name: 'Banca', keywords: /estratto conto|banca|intesa sanpaolo|unicredit|bper/i, cat: 'Banca', sub: 'Estratto Conto'},
-                    { name: 'Fattura', keywords: /fattura|ricevuta fiscale|documento commerciale/i, cat: 'Fatture', sub: 'Generica' }
-                ];
-                for (const rec of recognizers) {
-                    if (rec.keywords.test(text)) {
-                        setField(docForm['doc-category'], rec.cat);
-                        setField(docForm['doc-subcategory'], rec.sub);
-                        break; 
-                    }
-                }
-            }
-
-            const oggettoMatch = text.match(/(?:^|\n)\s*oggetto:?\s*(.*)/i);
-            if (oggettoMatch && oggettoMatch[1]) appendToDetails('Oggetto', oggettoMatch[1].trim());
-
-            const yearMatch = text.match(/\b(20\d{2})\b/);
-            if (yearMatch) setField(docForm['doc-year'], yearMatch[0]);
-
-            const dateMatch = text.match(/\b(\d{1,2}[\s\/\-\.]\d{1,2}[\s\/\-\.]\d{2,4})\b/);
-            if(dateMatch) appendToDetails('Data Doc.', dateMatch[0]);
-
-            const scadenzaMatch = text.match(/(?:scadenza|pagare entro il|da versare entro)[\s\S]*?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i);
-            if (scadenzaMatch && scadenzaMatch[1]) {
-                appendToDetails('Scadenza', scadenzaMatch[1]);
-                addTagFromOCR('Da Pagare');
-            }
-            
-            const importoMatch = text.match(/(?:totale|importo|totale da pagare)[\s\S]*?€?\s*(\d+[,.]\d{2})/i);
-            if (importoMatch && importoMatch[1]) appendToDetails('Importo', `€ ${importoMatch[1].replace(',', '.')}`);
-
-            const pivaMatch = text.match(/(?:p\.?\s?iva|partita iva)[\s\S]*?(\d{11})/i);
-            if (pivaMatch && pivaMatch[1]) appendToDetails('P.IVA', pivaMatch[1]);
-            
-            const cfMatch = text.match(/(?:c\.?\s?f\.?|codice fiscale)[\s\S]*?([A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z])/i);
-            if (cfMatch && cfMatch[1]) appendToDetails('Cod. Fiscale', cfMatch[1]);
-            
-            const ibanMatch = text.match(/\b(IT\d{2}[A-Z]\d{22})\b/i);
-            if (ibanMatch && ibanMatch[0]) appendToDetails('IBAN', ibanMatch[0]);
-
-            const docNumMatch = text.match(/(?:fattura|documento|polizza|verbale|bolletta|contratto)\s*(?:n\.?|numero|nr\.?)?\s*([a-zA-Z0-9\/\-]+)/i);
-            if(docNumMatch && docNumMatch[1]) appendToDetails(`N. ${docNumMatch[0].split(/[\s\n\r]/)[0]}`, docNumMatch[1]);
-            
-            if (/quietanza|pagamento ricevuto|pagato|pagata/i.test(text)) {
-                addTagFromOCR('Pagato');
-                if (currentTagsSet.has('Da Pagare')) {
-                    currentTagsSet.delete('Da Pagare');
-                    updateTagsUI();
-                }
-            }
-            if (/multa|sanzione|urgente|sollecito|sinistro/i.test(text)) addTagFromOCR('Urgente');
-
-            if (!detailsFound && text.trim().length > 0 && !detailsInput.value) {
-                const textSnippet = text.split('\n').slice(0, 5).join('\n').trim();
-                detailsInput.value = `Testo riconosciuto (estratto):\n----------------------------\n${textSnippet}`;
-                highlightField(detailsInput);
-            }
-        }
-        
-        async function renderPdfToCanvas(canvas, fileData, options = {}) {
-            if (!canvas || !fileData) return;
-            try {
-                const pdfjsLib = getPdfjsLib();
-                if (!pdfjsLib) throw new Error("PDF.js library not found");
-
-                const typedarray = new Uint8Array(atob(fileData.split(',')[1]).split('').map(char => char.charCodeAt(0)));
-                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                const page = await pdf.getPage(1);
-                
-                let scale = 1.0;
-                const viewport = page.getViewport({ scale: scale });
-                
-                if (options.isThumbnail) {
-                    scale = 128 / viewport.height;
-                } else if (options.isModal) {
-                    const container = canvas.parentElement;
-                    if (container) {
-                         const maxWidth = container.clientWidth;
-                         const maxHeight = container.clientHeight;
-                         scale = Math.min(maxWidth / viewport.width, maxHeight / viewport.height);
-                    }
-                } else {
-                    scale = (canvas.parentElement.clientWidth - 20) / viewport.width;
-                }
-
-                const scaledViewport = page.getViewport({ scale: scale });
-                const context = canvas.getContext('2d');
-                canvas.height = scaledViewport.height;
-                canvas.width = scaledViewport.width;
-                await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
-            } catch (error) {
-                console.error(`Error rendering PDF preview:`, error);
-                const container = canvas.parentElement;
-                if (container) {
-                    container.innerHTML = `<div class="text-center text-red-500 p-4"><i data-lucide="file-warning" class="mx-auto h-16 w-16"></i><p class="mt-2 text-sm">Errore anteprima PDF</p></div>`;
-                    lucide.createIcons();
-                }
-            }
-        }
-
-        function handleFilePreview(event) {
-            const file = event.target.files[0];
-            const previewContainer = document.getElementById('file-preview-container');
-            const previewEl = document.getElementById('file-preview');
-            ocrBtn.disabled = !file || (!file.type.startsWith('image/') && file.type !== 'application/pdf');
-            if (file) parseFilenameForMetadata(file.name);
-            previewContainer.classList.add('hidden');
-            previewEl.innerHTML = '';
-            if (!file) return;
-            previewContainer.classList.remove('hidden');
-            const reader = new FileReader();
-            reader.onload = e => {
-                const fileType = file.type || getMimeTypeFromName(file.name);
-                if (fileType.startsWith('image/')) {
-                    previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
-                } else if (fileType === 'application/pdf') {
-                    previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
-                    renderPdfToCanvas(previewEl.querySelector('canvas'), e.target.result);
-                } else {
-                     // Anche i file di office avranno un'icona generica qui per semplicità
-                    previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
-                    lucide.createIcons();
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function renderDocuments() {
-            currentPage = 1;
-            Crud.getAll(docs => {
-                const searchTerm = searchInput.value.toLowerCase();
-                
-                const filteredDocs = docs.filter(doc => {
-                    const inCategoryFilter = (!currentFilter.year || doc.year == currentFilter.year) &&
-                                     (!currentFilter.category || doc.category === currentFilter.category) &&
-                                     (!currentFilter.subcategory || doc.subcategory === currentFilter.subcategory);
-                    const inTagFilter = !activeTagFilter || (doc.tags && doc.tags.includes(activeTagFilter));
-                    const inSearch = searchTerm === '' || 
-                                     doc.displayName.toLowerCase().includes(searchTerm) ||
-                                     doc.category.toLowerCase().includes(searchTerm) ||
-                                     doc.subcategory.toLowerCase().includes(searchTerm) ||
-                                     (doc.details && doc.details.toLowerCase().includes(searchTerm)) ||
-                                     (doc.tags && doc.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
-                    return inCategoryFilter && inTagFilter && inSearch;
-                });
-
-                const sortValue = sortSelect.value;
-                filteredDocs.sort((a, b) => {
-                    switch (sortValue) {
-                        case 'name_asc': return a.displayName.localeCompare(b.displayName);
-                        case 'name_desc': return b.displayName.localeCompare(a.displayName);
-                        case 'year_asc': return a.year - b.year;
-                        case 'year_desc': return b.year - a.year;
-                        case 'date_asc': return a.uploadDate - b.uploadDate;
-                        case 'date_desc': default: return b.uploadDate - a.uploadDate;
-                    }
-                });
-                fullFilteredDocs = filteredDocs;
-                displayCurrentPage();
-            });
-        }
-        
-        function displayCurrentPage(append = false) {
-            if (!append) docListContainer.innerHTML = '';
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const docsToRender = fullFilteredDocs.slice(start, end);
-
-            if (fullFilteredDocs.length === 0 && !append) {
-                emptyStateEl.classList.remove('hidden');
-                loadMoreBtn.classList.add('hidden');
-            } else {
-                emptyStateEl.classList.add('hidden');
-                
-                if (currentView === 'list') {
-                    if(!append) docListContainer.className = 'space-y-3';
-                    docsToRender.forEach(createDocCard);
-                } else {
-                    if(!append) docListContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
-                    docsToRender.forEach(createDocGridItem);
-                }
-
-                if (fullFilteredDocs.length > end) {
-                    loadMoreBtn.classList.remove('hidden');
-                } else {
-                    loadMoreBtn.classList.add('hidden');
-                }
-            }
-            lucide.createIcons();
-        }
-
-        function createDocCard(doc) {
-            const details = document.createElement('details');
-            details.className = 'bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden';
-            
-            const tagsHTML = doc.tags && doc.tags.length > 0 ? `
-                <strong class="text-gray-500 dark:text-gray-400 col-span-1">Tags:</strong>
-                <div class="col-span-3 flex flex-wrap gap-2">
-                    ${doc.tags.map(tag => `<button class="tag-link bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800" data-tag="${tag}">${tag}</button>`).join('')}
-                </div>` : '';
-
-            const detailsHTML = doc.details ? `
-                <strong class="text-gray-500 dark:text-gray-400 col-span-1 mt-2">Dettagli:</strong>
-                <p class="col-span-3 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${doc.details}</p>` : '';
-
-            const attachmentsHTML = doc.attachments && doc.attachments.length > 0 ? `
-                <strong class="text-gray-500 dark:text-gray-400 col-span-1 mt-2">Allegati:</strong>
-                <div class="col-span-3 space-y-1">
-                    ${doc.attachments.map((att, index) => `<a href="#" class="attachment-link text-blue-600 dark:text-blue-400 hover:underline text-sm flex items-center gap-1" data-doc-id="${doc.id}" data-attachment-index="${index}"><i data-lucide="paperclip" class="w-3 h-3"></i> ${att.fileName}</a>`).join('')}
-                </div>` : '';
-
-            details.innerHTML = `
-                <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <div>
-                        <span class="font-semibold">${doc.displayName}</span>
-                        <div class="text-xs text-gray-500">${doc.category} / ${doc.subcategory}</div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                         <button class="preview-btn p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" data-id="${doc.id}" title="Apri anteprima">
-                            <i data-lucide="eye" class="w-5 h-5"></i>
-                         </button>
-                         <i data-lucide="chevron-right" class="summary-arrow w-5 h-5"></i>
-                    </div>
-                </summary>
-                <div class="details-content max-h-0 bg-gray-50 dark:bg-gray-700/50 p-4 border-t border-gray-200 dark:border-gray-700">
-                    <div class="grid grid-cols-4 gap-x-4 gap-y-2 text-sm">
-                        <strong class="text-gray-500 dark:text-gray-400">Anno:</strong><span>${doc.year}</span>
-                        <strong class="text-gray-500 dark:text-gray-400">Caricato:</strong><span>${new Date(doc.uploadDate).toLocaleDateString('it-IT')}</span>
-                        ${tagsHTML}
-                        ${detailsHTML}
-                        ${attachmentsHTML}
-                    </div>
-                    <div class="mt-4 flex justify-end gap-3">
-                        <button class="edit-doc-btn text-sm flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline" data-id="${doc.id}">
-                            <i data-lucide="edit-2" class="w-4 h-4"></i> Modifica
-                        </button>
-                        <button class="delete-doc-btn text-sm flex items-center gap-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:underline" data-id="${doc.id}">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i> Elimina
-                        </button>
-                    </div>
-                </div>`;
-            docListContainer.appendChild(details);
-        }
-
-        function createDocGridItem(doc) {
-            const card = document.createElement('div');
-            card.className = 'preview-btn bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer transition-transform transform hover:scale-105';
-            card.dataset.id = doc.id;
-            
-            let previewHTML = '';
-            
-            if (doc.fileType && doc.fileType.startsWith('image/')) {
-                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima di ${doc.displayName}"></div>`;
-            } else if (doc.fileType === 'application/pdf') {
-                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
-                setTimeout(() => renderPdfToCanvas(document.getElementById(`pdf-canvas-${doc.id}`), doc.fileData, { isThumbnail: true }), 0);
-            } else {
-                // Icona generica anche per i file Office nella griglia
-                previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
-            }
-
-            card.innerHTML = `
-                ${previewHTML}
-                <div class="p-3 flex-grow flex flex-col">
-                    <h3 class="font-semibold text-sm truncate flex-grow" title="${doc.displayName}">${doc.displayName}</h3>
-                    <p class="text-xs text-gray-500 truncate">${doc.category} / ${doc.subcategory}</p>
-                </div>
-            `;
-            docListContainer.appendChild(card);
-            if (!doc.fileType || (doc.fileType !== 'application/pdf' && !doc.fileType.startsWith('image/'))) {
-                lucide.createIcons({nodes: [card]});
-            }
-        }
-
-        function renderFilterTree() {
-            Crud.getAll(docs => {
-                const tree = docs.reduce((acc, doc) => {
-                    acc[doc.year] = acc[doc.year] || {};
-                    acc[doc.year][doc.category] = acc[doc.year][doc.category] || new Set();
-                    if(doc.subcategory) acc[doc.year][doc.category].add(doc.subcategory);
-                    return acc;
-                }, {});
-                let html = '';
-                const sortedYears = Object.keys(tree).sort((a, b) => b - a);
-                sortedYears.forEach(year => {
-                    const isYearActive = currentFilter.year == year && !currentFilter.category;
-                    const isYearInPath = currentFilter.year == year;
-                    html += `<details ${isYearInPath ? 'open' : ''}><summary class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isYearActive ? 'active' : ''}" data-filter-type="year" data-filter-value="${year}"><span>${year}</span></summary><ul class="pl-4 ml-1 border-l border-gray-200 dark:border-gray-700">`;
-                    Object.keys(tree[year]).sort().forEach(category => {
-                        const isCatActive = currentFilter.year == year && currentFilter.category === category && !currentFilter.subcategory;
-                        const isCatInPath = isYearInPath && currentFilter.category === category;
-                        html += `<li><details ${isCatInPath ? 'open' : ''}><summary class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isCatActive ? 'active' : ''}" data-filter-type="category" data-filter-value="${category}" data-filter-parent-year="${year}"><span>${category}</span></summary><ul class="pl-4 ml-1 border-l border-gray-200 dark:border-gray-700">`;
-                        [...tree[year][category]].sort().forEach(subcategory => {
-                            const isSubActive = isCatInPath && currentFilter.subcategory === subcategory;
-                            html += `<li class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isSubActive ? 'active' : ''}" data-filter-type="subcategory" data-filter-value="${subcategory}" data-filter-parent-year="${year}" data-filter-parent-category="${category}"><span>${subcategory}</span></li>`;
-                        });
-                        html += '</ul></details></li>';
-                    });
-                    html += '</ul></details>';
-                });
-                filterTreeEl.innerHTML = html;
-            });
-        }
-        
-        function updateDatalists() {
-            Crud.getAll(docs => {
-                const categories = new Set(), subcategories = new Set(), allTags = new Set();
-                docs.forEach(doc => {
-                    if (doc.category) categories.add(doc.category);
-                    if (doc.subcategory) subcategories.add(doc.subcategory);
-                    if (doc.tags) doc.tags.forEach(tag => allTags.add(tag));
-                });
-                const populate = (datalist, items) => {
-                    datalist.innerHTML = '';
-                    [...items].sort().forEach(item => datalist.innerHTML += `<option value="${item}">`);
-                };
-                populate(categorySuggestions, categories);
-                populate(subcategorySuggestions, subcategories);
-                populate(tagsSuggestions, allTags);
-                allKnownTags = allTags;
-            });
-        }
-
-        function updateTagsUI() {
-            if (!selectedTagsContainer) return;
-            docTagsHiddenInput.value = [...currentTagsSet].join(', ');
-            while (selectedTagsContainer.firstChild && selectedTagsContainer.firstChild !== docTagsInput) {
-                selectedTagsContainer.removeChild(selectedTagsContainer.firstChild);
-            }
-            currentTagsSet.forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium pl-2.5 pr-1 py-0.5 rounded-full';
-                tagEl.innerHTML = `${tag}<button type="button" class="remove-tag-btn rounded-full hover:bg-blue-200 dark:hover:bg-blue-700 p-0.5" data-tag="${tag}"><i data-lucide="x" class="w-3 h-3"></i></button>`;
-                selectedTagsContainer.insertBefore(tagEl, docTagsInput);
-            });
-            availableTagsContainer.innerHTML = '';
-            if (categoryScopedTags.size > 0) {
-                const availableTags = [...categoryScopedTags].filter(t => !currentTagsSet.has(t)).sort();
-                if (availableTags.length > 0) {
-                    availableTags.forEach(tag => {
-                        const tagBtn = document.createElement('button');
-                        tagBtn.type = 'button';
-                        tagBtn.className = 'add-tag-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-2 py-1 rounded-md';
-                        tagBtn.textContent = tag;
-                        tagBtn.dataset.tag = tag;
-                        availableTagsContainer.appendChild(tagBtn);
-                    });
-                    availableTagsSection.classList.remove('hidden');
-                } else {
-                    availableTagsSection.classList.add('hidden');
-                }
-            } else {
-                availableTagsSection.classList.add('hidden');
-            }
-            lucide.createIcons();
-        }
-        
-        async function updateCategoryScopedTags(category) {
-            if (!category || category.trim() === '') {
-                categoryScopedTags = new Set();
-            } else {
-                await new Promise(resolve => {
-                    Crud.getAll(docs => {
-                        const tags = new Set();
-                        docs.filter(doc => doc.category === category)
-                            .forEach(doc => {
-                                if (doc.tags) doc.tags.forEach(tag => tags.add(tag));
-                            });
-                        categoryScopedTags = tags;
-                        resolve();
-                    });
-                });
-            }
-            updateTagsUI();
-        }
-
-        function addTag(tag) {
-            const cleanedTag = tag.trim();
-            if (cleanedTag) {
-                currentTagsSet.add(cleanedTag);
-                updateTagsUI();
-            }
-        }
-        
-        function renderStats() {
-            Crud.getAll(docs => {
-                statsTotalDocs.textContent = docs.length;
-                let totalSize = 0;
-                docs.forEach(doc => {
-                    if(doc.fileData) totalSize += getBase64Size(doc.fileData);
-                    if(doc.attachments) {
-                        doc.attachments.forEach(att => totalSize += getBase64Size(att.fileData));
-                    }
-                });
-                statsTotalSize.textContent = formatBytes(totalSize);
-            });
-        }
-        
-        // --- MODIFICATO: Funzione di rendering anteprima ---
-        const renderPreviewContent = async (fileData, fileType, fileName) => {
-            previewContent.innerHTML = `<div class="text-white"><div class="ocr-loader mx-auto"></div><p class="mt-2">Caricamento anteprima...</p></div>`;
-
-            try {
-                if (fileType.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.src = fileData;
-                    img.className = 'max-w-full max-h-full object-contain';
-                    previewContent.innerHTML = '';
-                    previewContent.appendChild(img);
-                } else if (fileType === 'application/pdf') {
-                    const canvas = document.createElement('canvas');
-                    canvas.className = 'max-w-full max-h-full object-contain bg-white rounded-md shadow-lg';
-                    previewContent.innerHTML = '';
-                    previewContent.appendChild(canvas);
-                    await renderPdfToCanvas(canvas, fileData, { isModal: true });
-                } else if (fileType.endsWith('.document') || fileName.endsWith('.docx')) { // Word
-                    const docContainer = document.createElement('div');
-                    docContainer.className = "bg-white p-8 rounded-md w-full h-full overflow-y-auto text-black";
-                    previewContent.innerHTML = '';
-                    previewContent.appendChild(docContainer);
-                    const fileBlob = dataURLtoBlob(fileData);
-                    await window.docx.renderAsync(fileBlob, docContainer);
-                } else if (fileType.endsWith('.sheet') || fileName.endsWith('.xlsx')) { // Excel
-                    const excelContainer = document.createElement('div');
-                    excelContainer.className = 'excel-preview-container';
-                    previewContent.innerHTML = '';
-                    previewContent.appendChild(excelContainer);
-
-                    const arrayBuffer = await dataURLtoBlob(fileData).arrayBuffer();
-                    const data = new Uint8Array(arrayBuffer);
-                    const workbook = XLSX.read(data, {type:"array"});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const html = XLSX.utils.sheet_to_html(worksheet);
-                    excelContainer.innerHTML = html;
-                } else {
-                    throw new Error("Anteprima non disponibile");
-                }
-            } catch (error) {
-                console.error("Errore durante la generazione dell'anteprima:", error);
-                previewContent.innerHTML = `
-                    <div class="text-center text-white p-8">
-                        <i data-lucide="file-warning" class="mx-auto h-32 w-32 text-yellow-400"></i>
-                        <p class="mt-4">Anteprima non disponibile per ${fileName}</p>
-                        <p class="text-xs text-gray-400 mt-1">${error.message}</p>
-                    </div>`;
-                lucide.createIcons();
-            }
-        };
-
-        function showPreviewModal(docId, attachmentIndex = -1) {
-            Crud.get(docId, doc => {
-                if(!doc) return;
-                currentPreviewDoc = doc;
-                previewTitle.textContent = doc.displayName;
-                let fileToShow;
-                if (attachmentIndex > -1 && doc.attachments?.[attachmentIndex]) {
-                    const att = doc.attachments[attachmentIndex];
-                    fileToShow = { data: att.fileData, type: att.fileType, name: att.fileName };
-                } else {
-                    fileToShow = { data: doc.fileData, type: doc.fileType, name: doc.fileName };
-                }
-                
-                renderPreviewContent(fileToShow.data, fileToShow.type, fileToShow.name);
-
-                previewAttachmentsBar.innerHTML = '';
-                if (doc.attachments && doc.attachments.length > 0) {
-                    let attachmentsHTML = `<button class="attachment-preview-btn inline-block p-2 rounded-md hover:bg-gray-600 ${attachmentIndex === -1 ? 'bg-blue-600' : ''}" data-index="-1">${doc.fileName} (Principale)</button>`;
-                    doc.attachments.forEach((att, index) => {
-                        attachmentsHTML += `<button class="attachment-preview-btn inline-block p-2 rounded-md hover:bg-gray-600 ${attachmentIndex === index ? 'bg-blue-600' : ''}" data-index="${index}">${att.fileName}</button>`;
-                    });
-                    previewAttachmentsBar.innerHTML = attachmentsHTML;
-                    previewAttachmentsBar.classList.remove('hidden');
-                } else {
-                    previewAttachmentsBar.classList.add('hidden');
-                }
-                openModal(previewModal);
-            });
-        }
-        
-        const openAddModal = () => {
-            editingDocId = null;
-            docForm.reset();
-            clearAllHighlights();
-            attachmentsToAdd = [];
-            attachmentsListEl.innerHTML = '';
-            currentFileNameEl.textContent = '';
-            fileInput.setAttribute('required', 'true');
-            modalTitle.textContent = "Aggiungi Documento";
-            ocrBtn.disabled = true;
-            ocrStatusEl.innerHTML = '';
-            currentTagsSet = new Set();
-            updateCategoryScopedTags('');
-            openModal(docModal);
-        }
-
-        const openEditModal = (docId) => {
-            Crud.get(docId, doc => {
-                if (!doc) return;
-                editingDocId = doc.id;
-                docForm.reset();
-                clearAllHighlights();
-                attachmentsToAdd = [];
-                modalTitle.textContent = "Modifica Documento";
-                docIdInput.value = doc.id;
-                docForm['doc-name'].value = doc.displayName;
-                docForm['doc-year'].value = doc.year;
-                docForm['doc-category'].value = doc.category;
-                docForm['doc-subcategory'].value = doc.subcategory;
-                docForm['doc-details'].value = doc.details || '';
-                currentTagsSet = new Set(doc.tags || []);
-                updateCategoryScopedTags(doc.category);
-                currentFileNameEl.textContent = `File attuale: ${doc.fileName}. Selezionane uno nuovo per sostituirlo.`;
-                fileInput.removeAttribute('required');
-                ocrBtn.disabled = true;
-                ocrStatusEl.innerHTML = '';
-                attachmentsListEl.innerHTML = (doc.attachments || []).map((att, index) =>
-                    `<div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-1 rounded"><span>${att.fileName}</span><button type="button" class="remove-attachment-btn text-red-500 p-1" data-index="${index}"><i data-lucide="x" class="w-4 h-4"></i></button></div>`
-                ).join('');
-                lucide.createIcons();
-                openModal(docModal);
-            });
-        };
-
-        function showSnackbar(message, isError = false) {
-            const el = document.getElementById('snackbar');
-            el.textContent = message;
-            el.style.backgroundColor = isError ? '#ef4444' : ''; 
-            el.style.opacity = '1';
-            setTimeout(() => { el.style.opacity = '0'; }, 3000);
-        }
-        
-        const openModal = (modalEl) => modalEl.classList.remove('hidden');
-        const closeModal = (modalEl) => {
-            modalEl.classList.add('hidden');
-            if (modalEl === docModal) {
-                handleFilePreview({ target: { files: [] } });
-            }
-        };
-
-        function updateViewButtons(view) {
-            if (view === 'list') {
-                viewListBtn.classList.add('text-blue-500', 'bg-blue-50', 'dark:bg-gray-700');
-                viewGridBtn.classList.remove('text-blue-500', 'bg-blue-50', 'dark:bg-gray-700');
-            } else {
-                viewGridBtn.classList.add('text-blue-500', 'bg-blue-50', 'dark:bg-gray-700');
-                viewListBtn.classList.remove('text-blue-500', 'bg-blue-50', 'dark:bg-gray-700');
-            }
-        }
-
-        function setView(view) {
-            currentView = view;
-            localStorage.setItem('doc-view', view);
-            updateViewButtons(view);
-            renderDocuments();
-        }
-
-        const applyTheme = (theme) => {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        };
-        themeToggleBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            const newTheme = isDark ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
+        self.addEventListener('install', event => {
+            console.log('SW: Installazione...');
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => cache.addAll(URLS_TO_CACHE))
+                    .then(() => self.skipWaiting())
+            );
         });
 
-        menuBtn.addEventListener('click', () => {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-        });
-        const closeSidebar = () => {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-        };
-        overlay.addEventListener('click', closeSidebar);
-        closeSidebarBtn.addEventListener('click', closeSidebar);
-        resetFilterBtn.addEventListener('click', () => {
-            currentFilter = {};
-            activeTagFilter = null;
-            renderAll();
+        self.addEventListener('activate', event => {
+            console.log('SW: Attivazione...');
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.filter(cache => cache !== CACHE_NAME)
+                                  .map(cache => caches.delete(cache))
+                    );
+                }).then(() => self.clients.claim())
+            );
         });
 
-        filterTreeEl.addEventListener('click', e => {
-            const target = e.target.closest('summary, li[data-filter-type="subcategory"]');
-            if (!target) return;
-            e.preventDefault();
-            const { filterType, filterValue, filterParentYear, filterParentCategory } = target.dataset;
-            
-            if (filterType === 'subcategory') {
-                currentFilter = { year: filterParentYear, category: filterParentCategory, subcategory: filterValue };
-                closeSidebar();
-            } else if (target.tagName === 'SUMMARY') {
-                const detailsElement = target.parentElement;
-                
-                const isYearActive = currentFilter.year == filterValue && !currentFilter.category;
-                const isCatActive = currentFilter.year == filterParentYear && currentFilter.category === filterValue && !currentFilter.subcategory;
-
-                if (isYearActive) {
-                    currentFilter = {};
-                } else if (isCatActive) {
-                    currentFilter = { year: filterParentYear };
-                } else {
-                    if (filterType === 'year') currentFilter = { year: filterValue };
-                    else if (filterType === 'category') currentFilter = { year: filterParentYear, category: filterValue };
-                }
-                
-                if(!detailsElement.hasAttribute('open')) {
-                    detailsElement.setAttribute('open', '');
-                }
-            }
-            renderAll();
+        self.addEventListener('fetch', event => {
+             // Strategia: Cache first, poi network.
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => response || fetch(event.request))
+            );
         });
-
-        addDocBtn.addEventListener('click', openAddModal);
-        cancelBtn.addEventListener('click', () => closeModal(docModal));
-        fileInput.addEventListener('change', handleFilePreview);
-        ocrBtn.addEventListener('click', runOCR);
-        
-        attachmentsInput.addEventListener('change', (e) => {
-            attachmentsToAdd = [...e.target.files];
-            attachmentsListEl.innerHTML += attachmentsToAdd.map(file => 
-                `<div class="bg-blue-100 dark:bg-blue-900 p-1 rounded">Nuovo: ${file.name}</div>`
-            ).join('');
-        });
-
-        attachmentsListEl.addEventListener('click', (e) => {
-            const removeBtn = e.target.closest('.remove-attachment-btn');
-            if (removeBtn) {
-                const index = parseInt(removeBtn.dataset.index);
-                Crud.get(editingDocId, doc => {
-                    doc.attachments.splice(index, 1);
-                    Crud.save(doc, false);
-                    openEditModal(editingDocId);
-                });
-            }
-        });
-
-        docForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const file = fileInput.files[0];
-            const saveButton = e.submitter || docForm.querySelector('button[type="submit"]');
-            
-            const originalButtonHTML = saveButton.innerHTML;
-            saveButton.disabled = true;
-            saveButton.innerHTML = `<div class="ocr-loader mx-auto"></div>`;
-
-            try {
-                let fileHash = null;
-                if (file) {
-                    fileHash = await calculateFileHash(file);
-                    const existingDoc = await checkForDuplicate(fileHash);
-                    if (existingDoc && (!editingDocId || existingDoc.id != editingDocId)) {
-                        showSnackbar(`Questo file esiste già: "${existingDoc.displayName}"`, true);
-                        saveButton.disabled = false;
-                        saveButton.innerHTML = originalButtonHTML;
-                        return;
-                    }
-                }
-
-                const processSubmit = async (baseDoc) => {
-                    const newAttachments = await Promise.all(attachmentsToAdd.map(readFileAsDataURL));
-                    baseDoc.attachments = [...(baseDoc.attachments || []), ...newAttachments];
-                    const tags = docTagsHiddenInput.value.split(',').map(tag => tag.trim()).filter(tag => tag);
-                    
-                    const docData = {
-                        ...baseDoc,
-                        displayName: docForm['doc-name'].value,
-                        year: parseInt(docForm['doc-year'].value),
-                        category: docForm['doc-category'].value,
-                        subcategory: docForm['doc-subcategory'].value,
-                        tags: tags,
-                        details: docForm['doc-details'].value,
-                        uploadDate: editingDocId ? baseDoc.uploadDate : new Date().getTime(),
-                    };
-                    if (fileHash) docData.contentHash = fileHash;
-                    await Crud.save(docData);
-                };
-
-                if (editingDocId) {
-                    await new Promise((resolve, reject) => {
-                        Crud.get(editingDocId, async (doc) => {
-                            try {
-                                if (!doc) return reject(new Error("Documento da modificare non trovato."));
-                                let docToProcess = { ...doc };
-                                if (file) {
-                                    const { fileData, fileName, fileType } = await readFileAsDataURL(file);
-                                    docToProcess.fileData = fileData;
-                                    docToProcess.fileName = fileName;
-                                    docToProcess.fileType = fileType;
-                                }
-                                await processSubmit(docToProcess);
-                                resolve();
-                            } catch (err) { reject(err); }
-                        });
-                    });
-                } else {
-                    if (!file) throw new Error("Seleziona un file principale.");
-                    const { fileData, fileName, fileType } = await readFileAsDataURL(file);
-                    const newDoc = { fileData, fileName, fileType, attachments: [] };
-                    await processSubmit(newDoc);
-                }
-            } catch (error) {
-                console.error("Errore durante il salvataggio del documento:", error);
-                if (error.name !== 'ConstraintError') {
-                    showSnackbar(error.message || "Errore nel salvataggio.", true);
-                }
-            } finally {
-                saveButton.disabled = false;
-                saveButton.innerHTML = originalButtonHTML;
-            }
-        });
-        
-        docListContainer.addEventListener('click', (e) => {
-            const target = e.target.closest('.preview-btn, .edit-doc-btn, .attachment-link, .tag-link, .delete-doc-btn');
-            if (!target) return;
-            e.preventDefault();
-
-            if (target.matches('.delete-doc-btn')) {
-                docIdToDelete = parseInt(target.dataset.id);
-                openModal(confirmDeleteModal);
-            } else if (target.matches('.tag-link')) {
-                activeTagFilter = target.dataset.tag;
-                renderAll();
-            } else if (target.matches('.attachment-link')) {
-                showPreviewModal(target.dataset.docId, parseInt(target.dataset.attachmentIndex));
-            } else if (target.matches('.edit-doc-btn')) {
-                openEditModal(target.dataset.id);
-            } else if (target.matches('.preview-btn')) {
-                showPreviewModal(target.dataset.id);
-            }
-        });
-
-        docTagsInput.addEventListener('keydown', e => {
-            if (e.key === ',' || e.key === 'Enter') {
-                e.preventDefault();
-                addTag(docTagsInput.value);
-                docTagsInput.value = '';
-            }
-        });
-        selectedTagsContainer.addEventListener('click', e => {
-            const removeBtn = e.target.closest('.remove-tag-btn');
-            if (removeBtn) {
-                currentTagsSet.delete(removeBtn.dataset.tag);
-                updateTagsUI();
-            } else {
-                docTagsInput.focus();
-            }
-        });
-        availableTagsContainer.addEventListener('click', e => {
-            const addBtn = e.target.closest('.add-tag-btn');
-            if (addBtn) addTag(addBtn.dataset.tag);
-        });
-        categoryInput.addEventListener('input', (e) => updateCategoryScopedTags(e.target.value));
-
-        closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
-        
-        printBtn.addEventListener('click', () => {
-            const contentEl = previewContent.querySelector('canvas, img, div.docx-wrapper, div.excel-preview-container');
-            if (contentEl) {
-                if(contentEl.matches('canvas, img')) {
-                    const dataUrl = contentEl.tagName === 'CANVAS' ? contentEl.toDataURL('image/png') : contentEl.src;
-                    const printWindow = window.open('', '_blank');
-                    printWindow.document.write(`<html><body style="text-align:center;"><img src="${dataUrl}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
-                    printWindow.document.close();
-                    printWindow.focus();
-                } else {
-                     const printWindow = window.open('', '_blank');
-                     printWindow.document.write('<html><head><title>Stampa Documento</title>');
-                     // Aggiungi stili per la stampa se necessario
-                     printWindow.document.write('</head><body>');
-                     printWindow.document.write(contentEl.innerHTML);
-                     printWindow.document.write('</body></html>');
-                     printWindow.document.close();
-                     printWindow.focus();
-                     printWindow.print();
-                     printWindow.close();
-                }
-            } else {
-                 showSnackbar("Stampa non disponibile per questo file.", true);
-            }
-        });
-
-        editPreviewBtn.addEventListener('click', () => {
-            if (currentPreviewDoc) {
-                closeModal(previewModal);
-                openEditModal(currentPreviewDoc.id);
-            }
-        });
-        deletePreviewBtn.addEventListener('click', () => {
-            if (currentPreviewDoc) {
-                docIdToDelete = currentPreviewDoc.id;
-                openModal(confirmDeleteModal);
-            }
-        });
-        downloadBtn.addEventListener('click', () => {
-            if(currentPreviewDoc){
-                const a = document.createElement('a');
-                const currentAttachmentIndex = parseInt(previewAttachmentsBar.querySelector('.bg-blue-600')?.dataset.index ?? -1);
-                let fileToDownload = (currentAttachmentIndex === -1) 
-                    ? { data: currentPreviewDoc.fileData, name: currentPreviewDoc.fileName }
-                    : { data: currentPreviewDoc.attachments[currentAttachmentIndex].fileData, name: currentPreviewDoc.attachments[currentAttachmentIndex].fileName };
-                a.href = fileToDownload.data;
-                a.download = fileToDownload.name;
-                a.click();
-            }
-        });
-        previewAttachmentsBar.addEventListener('click', (e) => {
-            const btn = e.target.closest('.attachment-preview-btn');
-            if (btn) showPreviewModal(currentPreviewDoc.id, parseInt(btn.dataset.index));
-        });
-        
-        cancelDeleteBtn.addEventListener('click', () => {
-            docIdToDelete = null;
-            closeModal(confirmDeleteModal);
-        });
-        confirmDeleteBtn.addEventListener('click', () => {
-            if (docIdToDelete) {
-                Crud.delete(docIdToDelete);
-                docIdToDelete = null;
-                closeModal(confirmDeleteModal);
-            }
-        });
-
-        exportBtn.addEventListener('click', () => {
-            Crud.getAll(async (docs) => {
-                if (docs.length === 0) return showSnackbar("Nessun documento da esportare.");
-                showSnackbar("Creazione del backup in corso...");
-                try {
-                    const zip = new JSZip();
-                    const metadata = [];
-                    for (const doc of docs) {
-                        const docMetadata = { ...doc };
-                        const mainFileName = `${doc.id}-${doc.fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
-                        docMetadata.filePath = `files/${mainFileName}`;
-                        zip.file(docMetadata.filePath, dataURLtoBlob(doc.fileData));
-                        delete docMetadata.fileData;
-
-                        if (doc.attachments && doc.attachments.length > 0) {
-                            docMetadata.attachments = doc.attachments.map((att, i) => {
-                                const attMetadata = { ...att };
-                                const attFileName = `${doc.id}-att-${i}-${att.fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
-                                attMetadata.filePath = `files/${attFileName}`;
-                                zip.file(attMetadata.filePath, dataURLtoBlob(att.fileData));
-                                delete attMetadata.fileData;
-                                return attMetadata;
-                            });
-                        }
-                        metadata.push(docMetadata);
-                    }
-                    zip.file("metadata.json", JSON.stringify(metadata, null, 2));
-                    const zipBlob = await zip.generateAsync({ type: "blob" });
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(zipBlob);
-                    a.download = 'backup_documenti.zip';
-                    a.click();
-                    URL.revokeObjectURL(a.href);
-                    showSnackbar("Esportazione completata.");
-                } catch (err) {
-                    showSnackbar("Errore durante l'esportazione.", true);
-                    console.error(err);
-                }
-            });
-        });
-
-        importBtn.addEventListener('click', () => importFileInput.click());
-        importFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            showSnackbar("Importazione in corso...");
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const zip = await JSZip.loadAsync(e.target.result);
-                    const metadataFile = zip.file("metadata.json");
-                    if (!metadataFile) throw new Error("File metadata.json non trovato.");
-                    const metadata = JSON.parse(await metadataFile.async("string"));
-                    Crud.clear(async () => {
-                        showSnackbar(`Importazione di ${metadata.length} documenti...`);
-                        for (const docMeta of metadata) {
-                             if (!zip.file(docMeta.filePath)) {
-                                console.warn(`File ${docMeta.filePath} mancante per "${docMeta.displayName}".`);
-                                continue;
-                             }
-                             const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
-                             docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
-                             docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
-                             delete docMeta.filePath;
-                             
-                             if (docMeta.attachments) {
-                                for(let attMeta of docMeta.attachments) {
-                                    if (!zip.file(attMeta.filePath)) continue;
-                                    const attFileBlob = await zip.file(attMeta.filePath).async("blob");
-                                    attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
-                                    attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
-                                    delete attMeta.filePath;
-                                }
-                             }
-                             delete docMeta.id;
-                             const fileForHash = new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType });
-                             docMeta.contentHash = await calculateFileHash(fileForHash);
-                             db.transaction("documents", "readwrite").objectStore("documents").put(docMeta);
-                        }
-                        showSnackbar('Importazione completata!');
-                        renderAll();
-                    });
-                } catch (error) {
-                    showSnackbar("Errore: il file di backup non è valido.", true);
-                    console.error("Import error:", error);
-                } finally {
-                    importFileInput.value = ''; 
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        searchInput.addEventListener('input', renderDocuments);
-        sortSelect.addEventListener('change', renderDocuments);
-        itemsPerPageSelect.addEventListener('change', (e) => {
-            itemsPerPage = parseInt(e.target.value, 10);
-            renderDocuments();
-        });
-        loadMoreBtn.addEventListener('click', () => {
-            currentPage++;
-            displayCurrentPage(true);
-        });
-
-        viewListBtn.addEventListener('click', () => setView('list'));
-        viewGridBtn.addEventListener('click', () => setView('grid'));
-
-        fieldsToHighlight.forEach(field => {
-            const removeHighlight = () => field.classList.remove('highlight-suggestion');
-            field.addEventListener('input', removeHighlight);
-            field.addEventListener('focus', removeHighlight);
-        });
-        
-        // --- Logica Fullscreen Aggiunta ---
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Errore nell'attivare la modalità a schermo intero: ${err.message} (${err.name})`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            const maximizeIcon = fullscreenBtn.querySelector('[data-lucide="maximize"]');
-            const minimizeIcon = fullscreenBtn.querySelector('[data-lucide="minimize"]');
-            if (document.fullscreenElement) {
-                maximizeIcon.classList.add('hidden');
-                minimizeIcon.classList.remove('hidden');
-            } else {
-                maximizeIcon.classList.remove('hidden');
-                minimizeIcon.classList.add('hidden');
-            }
-        });
-
-        // --- Inizializzazione ---
-        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        applyTheme(savedTheme);
-        updateViewButtons(currentView);
-        initDB();
-        lucide.createIcons();
-    }
-
-    window.addEventListener('load', () => {
-        // Aggiungiamo le nuove librerie al controllo
-        const requiredLibs = ['pdfjsLib', 'Tesseract', 'JSZip', 'lucide', 'docx', 'XLSX'];
-        const maxRetries = 20;
-        let retries = 0;
-        const checkInterval = setInterval(() => {
-            const missingLibs = requiredLibs.filter(lib => typeof window[lib] === 'undefined' || window[lib] === null);
-            if (missingLibs.length === 0) {
-                clearInterval(checkInterval);
-                initializeApp();
-            } else {
-                retries++;
-                if (retries > maxRetries) {
-                    clearInterval(checkInterval);
-                    document.getElementById('missing-libs-list').textContent = `Dettagli: ${missingLibs.join(', ')} non trovate.`;
-                    document.getElementById('load-error-modal').classList.remove('hidden');
-                    if (window.lucide) lucide.createIcons();
-                    document.getElementById('reload-page-btn').onclick = () => window.location.reload();
-                }
-            }
-        }, 500);
-    });
-    </script>
-    
-    <!-- ===================================================================== -->
-    <!-- SEZIONE DEBUG: Logica per Service Worker e Installazione PWA        -->
-    <!-- ===================================================================== -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        
-        if (isStandalone) {
-             console.log("PWA DEBUG: L'app è già in modalità standalone. Il pulsante di installazione non verrà mostrato.");
-             if(installBtn) installBtn.style.display = 'none';
-        } else {
-            console.log("PWA DEBUG: L'app è in esecuzione nel browser. In attesa dei criteri di installabilità.");
-        }
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
-            if (isStandalone) return;
-            console.log('PWA DEBUG: Evento "beforeinstallprompt" intercettato! L\'app è installabile.');
-            e.preventDefault();
-            deferredPrompt = e;
-            if (installBtn) {
-                console.log("PWA DEBUG: Mostro il pulsante di installazione personalizzato.");
-                installBtn.classList.remove('hidden');
-            }
-        });
-
-        if (installBtn) {
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    console.log("PWA DEBUG: L'utente ha cliccato il pulsante. Mostro il prompt nativo.");
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`PWA DEBUG: Scelta dell'utente: ${outcome}`);
-                    if (outcome === 'accepted') {
-                        installBtn.classList.add('hidden');
-                    }
-                    deferredPrompt = null;
-                } else {
-                    console.log("PWA DEBUG: Il pulsante è stato cliccato, ma 'deferredPrompt' non è disponibile.");
-                }
-            });
-        }
-        
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA DEBUG: Evento "appinstalled" ricevuto. Installazione completata!');
-            if (installBtn) installBtn.style.display = 'none';
-            deferredPrompt = null;
-            if(typeof showSnackbar === 'function') {
-                showSnackbar('Applicazione installata con successo!');
-            }
-        });
-
-        const swCode = `
-            const CACHE_NAME = 'doc-manager-cache-v4'; // Versione cache incrementata
-            const URLS_TO_CACHE = [
-                './',
-                'https://cdn.tailwindcss.com',
-                'https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-                'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-                'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-                // Aggiunta delle nuove librerie alla cache
-                'https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
-            ];
-
-            self.addEventListener('install', event => {
-                console.log('SW: Installazione...');
-                event.waitUntil(
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.addAll(URLS_TO_CACHE))
-                        .then(() => self.skipWaiting())
-                );
-            });
-
-            self.addEventListener('activate', event => {
-                console.log('SW: Attivazione...');
-                event.waitUntil(
-                    caches.keys().then(cacheNames => {
-                        return Promise.all(
-                            cacheNames.filter(cache => cache !== CACHE_NAME)
-                                      .map(cache => caches.delete(cache))
-                        );
-                    }).then(() => self.clients.claim())
-                );
-            });
-
-            self.addEventListener('fetch', event => {
-                event.respondWith(
-                    caches.match(event.request)
-                        .then(response => response || fetch(event.request))
-                );
-            });
-        `;
-
+    } 
+    // Contesto BROWSER (PAGINA WEB)
+    else {
+        // --- Registrazione del Service Worker ---
         if ('serviceWorker' in navigator) {
-            try {
-                const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(swBlob);
-                navigator.serviceWorker.register(swUrl, { scope: './' })
+            window.addEventListener('load', () => {
+                // Registriamo questo stesso file come Service Worker.
+                navigator.serviceWorker.register(window.location.href, { scope: './' })
                     .then(registration => {
                         console.log('PWA DEBUG: Service Worker registrato con successo. Scope:', registration.scope);
                     })
                     .catch(error => {
                         console.error('PWA DEBUG: Registrazione del Service Worker fallita:', error);
                     });
-            } catch (error) {
-                 console.error('PWA DEBUG: Errore nella creazione del Blob per il Service Worker:', error);
-            }
+            });
         }
-    });
+        
+        // --- Funzione principale dell'applicazione ---
+        function initializeApp() {
+            // ... TUTTO il codice della tua app che era in <script> e in DOMContentLoaded va qui ...
+            // Per brevità, lo incollo qui sotto. Il codice è identico al tuo originale.
+            
+            console.log("App inizializzata.");
+        
+            if (window.pdfjsLib) {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+            } else {
+                console.warn("Attenzione: libreria PDF.js non caricata.");
+            }
+            
+            const docListContainer = document.getElementById('document-list-container');
+            const emptyStateEl = document.getElementById('empty-state');
+            const searchInput = document.getElementById('search-input');
+            const sortSelect = document.getElementById('sort-select');
+            const addDocBtn = document.getElementById('add-doc-btn');
+            let currentFilter = {};
+            let activeTagFilter = null;
+            let db;
+            let docIdToDelete = null;
+            let editingDocId = null;
+            let attachmentsToAdd = [];
+            let currentPreviewDoc = null;
+            let currentView = localStorage.getItem('doc-view') || 'list';
+            let fullFilteredDocs = [];
+            let currentPage = 1;
+            let itemsPerPage = 10;
+
+            const docModal = document.getElementById('doc-modal');
+            const docForm = document.getElementById('doc-form');
+            const modalTitle = document.getElementById('modal-title');
+            const docIdInput = docForm['doc-id'];
+            const cancelBtn = document.getElementById('cancel-btn');
+            const fileInput = docForm['doc-file'];
+            const ocrBtn = document.getElementById('ocr-btn');
+            const ocrStatusEl = document.getElementById('ocr-status');
+            const currentFileNameEl = document.getElementById('current-file-name');
+            const attachmentsInput = docForm['doc-attachments'];
+            const attachmentsListEl = document.getElementById('attachments-list');
+            const categorySuggestions = document.getElementById('category-suggestions');
+            const subcategorySuggestions = document.getElementById('subcategory-suggestions');
+            const tagsSuggestions = document.getElementById('tags-suggestions');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const menuBtn = document.getElementById('menu-btn');
+            const filterTreeEl = document.getElementById('filter-tree');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const resetFilterBtn = document.getElementById('reset-filter-btn');
+            const previewModal = document.getElementById('preview-modal');
+            const previewTitle = document.getElementById('preview-title');
+            const previewContent = document.getElementById('preview-content');
+            const previewAttachmentsBar = document.getElementById('preview-attachments-bar');
+            const closePreviewBtn = document.getElementById('close-preview-btn');
+            const printBtn = document.getElementById('print-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const editPreviewBtn = document.getElementById('edit-preview-btn');
+            const deletePreviewBtn = document.getElementById('delete-preview-btn');
+            const confirmDeleteModal = document.getElementById('confirm-delete-modal');
+            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            const exportBtn = document.getElementById('export-data-btn');
+            const importBtn = document.getElementById('import-data-btn');
+            const importFileInput = document.getElementById('import-file-input');
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const viewListBtn = document.getElementById('view-list-btn');
+            const viewGridBtn = document.getElementById('view-grid-btn');
+            const statsTotalDocs = document.getElementById('stats-total-docs');
+            const statsTotalSize = document.getElementById('stats-total-size');
+            const itemsPerPageSelect = document.getElementById('items-per-page-select');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const loadErrorModal = document.getElementById('load-error-modal');
+            const fieldsToHighlight = [
+                docForm['doc-name'], docForm['doc-year'], docForm['doc-category'],
+                docForm['doc-subcategory'], docForm['doc-details']
+            ];
+            
+            const selectedTagsContainer = document.getElementById('selected-tags-container');
+            const docTagsInput = document.getElementById('doc-tags-input');
+            const availableTagsSection = document.getElementById('available-tags-section');
+            const availableTagsContainer = document.getElementById('available-tags-container');
+            const docTagsHiddenInput = document.getElementById('doc-tags');
+            const categoryInput = docForm['doc-category'];
+
+            let currentTagsSet = new Set();
+            let allKnownTags = new Set();
+            let categoryScopedTags = new Set();
+            
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+            if (isStandalone) {
+                console.log("PWA DEBUG: L'app è già in modalità standalone.");
+                if(installBtn) installBtn.style.display = 'none';
+            } else {
+                console.log("PWA DEBUG: L'app è in esecuzione nel browser, in attesa dei criteri di installabilità.");
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    console.log('PWA DEBUG: Evento "beforeinstallprompt" intercettato! L\'app è installabile.');
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    if (installBtn) {
+                        installBtn.classList.remove('hidden');
+                    }
+                });
+            }
+
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') {
+                            installBtn.classList.add('hidden');
+                        }
+                        deferredPrompt = null;
+                    }
+                });
+            }
+            
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA DEBUG: Evento "appinstalled" ricevuto.');
+                if (installBtn) installBtn.style.display = 'none';
+                deferredPrompt = null;
+                showSnackbar('Applicazione installata con successo!');
+            });
+            
+
+            function getPdfjsLib() {
+                if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                    return window.pdfjsLib;
+                }
+                console.error("Libreria PDF.js non caricata.");
+                showSnackbar("Errore: la libreria per i PDF non è stata caricata.");
+                return null;
+            }
+
+            function initDB() {
+                const request = indexedDB.open("DocumentManagerDB_v3", 2);
+                request.onerror = e => console.error("DB Error:", e.target.errorCode);
+                request.onupgradeneeded = e => {
+                    db = e.target.result;
+                    let store;
+                    if (!db.objectStoreNames.contains("documents")) {
+                        store = db.createObjectStore("documents", { keyPath: "id", autoIncrement: true });
+                        store.createIndex("year_category_subcategory", ["year", "category", "subcategory"], { unique: false });
+                    } else {
+                        store = e.target.transaction.objectStore("documents");
+                    }
+                    if (!store.indexNames.contains("contentHash")) {
+                        store.createIndex("contentHash", "contentHash", { unique: true });
+                    }
+                };
+                request.onsuccess = e => {
+                    db = e.target.result;
+                    renderAll();
+                };
+            }
+
+            function renderAll() {
+                renderDocuments();
+                renderFilterTree();
+                updateDatalists();
+                renderStats();
+            }
+            
+            const Crud = {
+                save: (doc, showNotification = true) => {
+                    return new Promise((resolve, reject) => {
+                        const tx = db.transaction("documents", "readwrite");
+                        tx.oncomplete = () => {
+                            if (showNotification) showSnackbar("Documento salvato!");
+                            closeModal(docModal);
+                            renderAll();
+                            resolve();
+                        };
+                        tx.onerror = (event) => {
+                            console.error("Errore transazione DB:", event.target.error);
+                            if (event.target.error.name === 'ConstraintError') {
+                                showSnackbar("Errore: un file con questo stesso contenuto esiste già.", true);
+                            }
+                            reject(event.target.error);
+                        };
+                        tx.objectStore("documents").put(doc);
+                    });
+                },
+                delete: (docId) => {
+                    const tx = db.transaction("documents", "readwrite");
+                    tx.objectStore("documents").delete(docId);
+                    tx.oncomplete = () => {
+                        showSnackbar("Documento eliminato.");
+                        currentPreviewDoc = null;
+                        renderAll();
+                        if(!previewModal.classList.contains('hidden')) closeModal(previewModal);
+                    };
+                },
+                get: (docId, callback) => {
+                    db.transaction("documents").objectStore("documents").get(parseInt(docId)).onsuccess = e => callback(e.target.result);
+                },
+                getAll: (callback) => {
+                    db.transaction("documents").objectStore("documents").getAll().onsuccess = e => callback(e.target.result);
+                },
+                clear: (callback) => {
+                    const tx = db.transaction("documents", "readwrite");
+                    tx.objectStore("documents").clear();
+                    tx.oncomplete = callback;
+                }
+            };
+            
+            function calculateSimilarity(s1, s2) {
+                let longer = s1, shorter = s2;
+                if (s1.length < s2.length) { longer = s2; shorter = s1; }
+                const longerLength = longer.length;
+                if (longerLength === 0) return 1.0;
+                return (longerLength - levenshteinDistance(longer, shorter)) / parseFloat(longerLength);
+            }
+
+            function levenshteinDistance(s1, s2) {
+                s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
+                const costs = [];
+                for (let i = 0; i <= s1.length; i++) {
+                    let lastValue = i;
+                    for (let j = 0; j <= s2.length; j++) {
+                        if (i == 0) costs[j] = j;
+                        else {
+                            if (j > 0) {
+                                let newValue = costs[j - 1];
+                                if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                                costs[j - 1] = lastValue;
+                                lastValue = newValue;
+                            }
+                        }
+                    }
+                    if (i > 0) costs[s2.length] = lastValue;
+                }
+                return costs[s2.length];
+            }
+            
+            function findBestMatchForWord(word, wordList) {
+                let bestScore = 0;
+                for (const ocrWord of wordList) {
+                    const score = calculateSimilarity(word, ocrWord);
+                    if (score > bestScore) bestScore = score;
+                }
+                return bestScore;
+            }
+
+            function getMimeTypeFromName(fileName) {
+                if (!fileName || !fileName.includes('.')) return 'application/octet-stream';
+                const extension = fileName.split('.').pop().toLowerCase();
+                switch (extension) {
+                    case 'jpg': case 'jpeg': return 'image/jpeg';
+                    case 'png': return 'image/png';
+                    case 'gif': return 'image/gif';
+                    case 'webp': return 'image/webp';
+                    case 'svg': return 'image/svg+xml';
+                    case 'pdf': return 'application/pdf';
+                    case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                    case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    default: return 'application/octet-stream';
+                }
+            }
+
+            function getExistingCategoriesAndSubcategories() {
+                return new Promise(resolve => {
+                    Crud.getAll(docs => {
+                        const existingCategories = new Set(), existingSubcategories = new Set();
+                        docs.forEach(doc => {
+                            if (doc.category) existingCategories.add(doc.category);
+                            if (doc.subcategory) existingSubcategories.add(doc.subcategory);
+                        });
+                        resolve({ existingCategories, existingSubcategories });
+                    });
+                });
+            }
+
+            const dataURLtoBlob = (dataurl) => {
+                if (!dataurl || !dataurl.includes(',')) return null;
+                const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]);
+                let n = bstr.length; const u8arr = new Uint8Array(n);
+                while(n--) u8arr[n] = bstr.charCodeAt(n);
+                return new Blob([u8arr], {type:mime});
+            }
+
+            const readFileAsDataURL = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve({
+                        fileData: reader.result, fileName: file.name,
+                        fileType: file.type || getMimeTypeFromName(file.name)
+                    });
+                    reader.onerror = () => reject(new Error(`Impossibile leggere il file "${file.name}"`));
+                    reader.readAsDataURL(file);
+                });
+            };
+
+            async function calculateFileHash(file) {
+                const buffer = await file.arrayBuffer();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            function checkForDuplicate(hash) {
+                return new Promise((resolve, reject) => {
+                    if (!db) return resolve(null);
+                    const index = db.transaction("documents", "readonly").objectStore("documents").index("contentHash");
+                    const request = index.get(hash);
+                    request.onsuccess = () => resolve(request.result || null);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            }
+
+            const getBase64Size = (base64) => {
+                if (!base64 || typeof base64 !== 'string') return 0;
+                return 4 * Math.ceil((base64.length - base64.indexOf(',')) / 3) * 0.5624896334383812;
+            };
+
+            const formatBytes = (bytes, decimals = 2) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024, dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            const highlightField = (element) => {
+                if (element && element.value) element.classList.add('highlight-suggestion');
+            };
+
+            const clearAllHighlights = () => fieldsToHighlight.forEach(f => f.classList.remove('highlight-suggestion'));
+
+            function parseFilenameForMetadata(filename) {
+                if (!filename) return;
+                const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
+                if (!docForm['doc-name'].value) {
+                    docForm['doc-name'].value = nameWithoutExt.replace(/[-_]/g, ' ');
+                    highlightField(docForm['doc-name']);
+                }
+                if (!docForm['doc-year'].value) {
+                    const yearMatch = nameWithoutExt.match(/\b(19|20)\d{2}\b/);
+                    if (yearMatch) {
+                        docForm['doc-year'].value = yearMatch[0];
+                        highlightField(docForm['doc-year']);
+                    }
+                }
+                if (!docForm['doc-category'].value) {
+                    const parts = nameWithoutExt.replace(/\b(19|20)\d{2}\b/, '').split(/[-_ ]+/).filter(p => p.toLowerCase() !== 'fattura' && p.toLowerCase() !== 'bolletta');
+                    if (parts.length > 0) {
+                        docForm['doc-category'].value = parts[0];
+                        highlightField(docForm['doc-category']);
+                    }
+                    if (parts.length > 1 && !docForm['doc-subcategory'].value) {
+                        docForm['doc-subcategory'].value = parts[1];
+                        highlightField(docForm['doc-subcategory']);
+                    }
+                }
+            }
+            
+            async function runOCR() {
+                const file = fileInput.files[0];
+                if (!file || (!file.type.startsWith('image/') && file.type !== 'application/pdf')) {
+                    return showSnackbar("Seleziona un file immagine o PDF per l'analisi OCR.");
+                }
+                ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Inizializzazione OCR...</span>`;
+                ocrBtn.disabled = true;
+                const worker = await Tesseract.createWorker('ita', 1, {
+                    logger: m => {
+                        if (m.status === 'recognizing text') ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Analisi in corso (${(m.progress * 100).toFixed(0)}%)...</span>`;
+                        else if (m.status === 'loading language model') ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Caricamento modello lingua...</span>`;
+                    },
+                });
+                try {
+                    let imageSource;
+                    if (file.type.startsWith('image/')) imageSource = file;
+                    else if (file.type === 'application/pdf') {
+                        ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Caricamento PDF...</span>`;
+                        const pdfjsLib = getPdfjsLib(); 
+                        if (!pdfjsLib) throw new Error("Libreria PDF non disponibile.");
+                        const arrayBuffer = await file.arrayBuffer();
+                        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+                        const page = await pdf.getPage(1);
+                        const viewport = page.getViewport({ scale: 2.0 });
+                        const canvas = document.createElement('canvas');
+                        canvas.height = viewport.height; canvas.width = viewport.width;
+                        await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+                        imageSource = canvas;
+                    }
+                    const { data: { text } } = await worker.recognize(imageSource);
+                    await parseOCRText(text);
+                    ocrStatusEl.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i> <span>Analisi completata. Controlla i campi.</span>`;
+                } catch (error) {
+                    console.error("OCR Error:", error);
+                    ocrStatusEl.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i> <span class="text-left">Errore durante l'analisi.</span>`;
+                } finally {
+                    await worker.terminate();
+                    ocrBtn.disabled = false;
+                    lucide.createIcons();
+                }
+            }
+
+            async function parseOCRText(text) {
+                if (!text) return;
+                let detailsFound = false; 
+                const setField = (element, value) => {
+                    if (element && !element.value && value) {
+                        element.value = value.trim();
+                        highlightField(element);
+                    }
+                };
+                const appendToDetails = (label, value) => {
+                    if (value) {
+                        detailsFound = true; 
+                        const cleanLabel = label.trim(), cleanValue = value.trim();
+                        const labelRegex = new RegExp(`^${cleanLabel}:|\\n${cleanLabel}:`, 'm');
+                        if (!labelRegex.test(docForm['doc-details'].value)) {
+                            docForm['doc-details'].value += (docForm['doc-details'].value ? '\n' : '') + `${cleanLabel}: ${cleanValue}`;
+                            highlightField(docForm['doc-details']);
+                        }
+                    }
+                };
+                const addTagFromOCR = (tag) => {
+                    if (tag && !currentTagsSet.has(tag.trim())) {
+                        currentTagsSet.add(tag.trim());
+                        updateTagsUI();
+                        highlightField(selectedTagsContainer); 
+                    }
+                };
+                const { existingCategories, existingSubcategories } = await getExistingCategoriesAndSubcategories();
+                const sortedCategories = [...existingCategories].sort((a, b) => b.length - a.length);
+                const sortedSubcategories = [...existingSubcategories].sort((a, b) => b.length - a.length);
+                const ocrWords = text.toLowerCase().replace(/[.,/#!$%\^&*;:{}=\-_`~()]/g, "").split(/\s+/).filter(Boolean);
+                const WORD_SIMILARITY_THRESHOLD = 0.8; 
+                if (!docForm['doc-category'].value) {
+                    for (const category of sortedCategories) {
+                        const catWords = category.toLowerCase().split(' '); let allWordsFound = true;
+                        for (const catWord of catWords) { if (findBestMatchForWord(catWord, ocrWords) < WORD_SIMILARITY_THRESHOLD) { allWordsFound = false; break; } }
+                        if (allWordsFound) { setField(docForm['doc-category'], category); break; }
+                    }
+                }
+                if (!docForm['doc-subcategory'].value) {
+                    for (const subcategory of sortedSubcategories) {
+                        const subCatWords = subcategory.toLowerCase().split(' '); let allWordsFound = true;
+                        for (const subCatWord of subCatWords) { if (findBestMatchForWord(subCatWord, ocrWords) < WORD_SIMILARITY_THRESHOLD) { allWordsFound = false; break; } }
+                        if (allWordsFound) { setField(docForm['doc-subcategory'], subcategory); break; }
+                    }
+                }
+                if (!docForm['doc-category'].value) {
+                    const recognizers = [
+                        { name: 'Luce', keywords: /enel|servizio elettrico|e-distribuzione|a2a energia/i, cat: 'Bollette', sub: 'Luce' },
+                        { name: 'Gas', keywords: /enel energia|eni|plenitude|snam|italgas|a2a/i, cat: 'Bollette', sub: 'Gas' },
+                        { name: 'Acqua', keywords: /acea|acquedotto|publiacqua|acque/i, cat: 'Bollette', sub: 'Acqua' },
+                        { name: 'Telefonia', keywords: /tim|telecom|vodafone|wind|tre|iliad|fastweb|sky wifi/i, cat: 'Bollette', sub: 'Telefonia' },
+                        { name: 'Rifiuti', keywords: /tari|tassa sui rifiuti|azienda municipalizzata/i, cat: 'Tasse', sub: 'Rifiuti' },
+                        { name: 'Assicurazione', keywords: /allianz|generali|unipolsai|cattolica assicurazioni|reale mutuale/i, cat: 'Assicurazioni', sub: 'Polizza' },
+                        { name: 'Sanità', keywords: /referto|ricetta medica|asl|cup|azienda sanitaria|analisi/i, cat: 'Sanità', sub: 'Referto' },
+                        { name: 'Multe', keywords: /multa|sanzione amministrativa|verbale di accertamento|polizia locale/i, cat: 'Multe', sub: 'Violazione' },
+                        { name: 'Banca', keywords: /estratto conto|banca|intesa sanpaolo|unicredit|bper/i, cat: 'Banca', sub: 'Estratto Conto'},
+                        { name: 'Fattura', keywords: /fattura|ricevuta fiscale|documento commerciale/i, cat: 'Fatture', sub: 'Generica' }
+                    ];
+                    for (const rec of recognizers) { if (rec.keywords.test(text)) { setField(docForm['doc-category'], rec.cat); setField(docForm['doc-subcategory'], rec.sub); break; } }
+                }
+                const oggettoMatch = text.match(/(?:^|\n)\s*oggetto:?\s*(.*)/i);
+                if (oggettoMatch && oggettoMatch[1]) appendToDetails('Oggetto', oggettoMatch[1].trim());
+                const yearMatch = text.match(/\b(20\d{2})\b/);
+                if (yearMatch) setField(docForm['doc-year'], yearMatch[0]);
+                const dateMatch = text.match(/\b(\d{1,2}[\s\/\-\.]\d{1,2}[\s\/\-\.]\d{2,4})\b/);
+                if(dateMatch) appendToDetails('Data Doc.', dateMatch[0]);
+                const scadenzaMatch = text.match(/(?:scadenza|pagare entro il|da versare entro)[\s\S]*?(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i);
+                if (scadenzaMatch && scadenzaMatch[1]) { appendToDetails('Scadenza', scadenzaMatch[1]); addTagFromOCR('Da Pagare'); }
+                const importoMatch = text.match(/(?:totale|importo|totale da pagare)[\s\S]*?€?\s*(\d+[,.]\d{2})/i);
+                if (importoMatch && importoMatch[1]) appendToDetails('Importo', `€ ${importoMatch[1].replace(',', '.')}`);
+                const pivaMatch = text.match(/(?:p\.?\s?iva|partita iva)[\s\S]*?(\d{11})/i);
+                if (pivaMatch && pivaMatch[1]) appendToDetails('P.IVA', pivaMatch[1]);
+                const cfMatch = text.match(/(?:c\.?\s?f\.?|codice fiscale)[\s\S]*?([A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z])/i);
+                if (cfMatch && cfMatch[1]) appendToDetails('Cod. Fiscale', cfMatch[1]);
+                const ibanMatch = text.match(/\b(IT\d{2}[A-Z]\d{22})\b/i);
+                if (ibanMatch && ibanMatch[0]) appendToDetails('IBAN', ibanMatch[0]);
+                const docNumMatch = text.match(/(?:fattura|documento|polizza|verbale|bolletta|contratto)\s*(?:n\.?|numero|nr\.?)?\s*([a-zA-Z0-9\/\-]+)/i);
+                if(docNumMatch && docNumMatch[1]) appendToDetails(`N. ${docNumMatch[0].split(/[\s\n\r]/)[0]}`, docNumMatch[1]);
+                if (/quietanza|pagamento ricevuto|pagato|pagata/i.test(text)) { addTagFromOCR('Pagato'); if (currentTagsSet.has('Da Pagare')) { currentTagsSet.delete('Da Pagare'); updateTagsUI(); } }
+                if (/multa|sanzione|urgente|sollecito|sinistro/i.test(text)) addTagFromOCR('Urgente');
+                if (!detailsFound && text.trim().length > 0 && !docForm['doc-details'].value) {
+                    const textSnippet = text.split('\n').slice(0, 5).join('\n').trim();
+                    docForm['doc-details'].value = `Testo riconosciuto (estratto):\n----------------------------\n${textSnippet}`;
+                    highlightField(docForm['doc-details']);
+                }
+            }
+            
+            async function renderPdfToCanvas(canvas, fileData, options = {}) {
+                if (!canvas || !fileData) return;
+                try {
+                    const pdfjsLib = getPdfjsLib();
+                    if (!pdfjsLib) throw new Error("PDF.js library not found");
+                    const typedarray = new Uint8Array(atob(fileData.split(',')[1]).split('').map(char => char.charCodeAt(0)));
+                    const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                    const page = await pdf.getPage(1);
+                    let scale = 1.0;
+                    const viewport = page.getViewport({ scale: scale });
+                    if (options.isThumbnail) scale = 128 / viewport.height;
+                    else if (options.isModal) {
+                        const container = canvas.parentElement;
+                        if (container) scale = Math.min(container.clientWidth / viewport.width, container.clientHeight / viewport.height);
+                    } else scale = (canvas.parentElement.clientWidth - 20) / viewport.width;
+                    const scaledViewport = page.getViewport({ scale: scale });
+                    canvas.height = scaledViewport.height; canvas.width = scaledViewport.width;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: scaledViewport }).promise;
+                } catch (error) {
+                    console.error(`Error rendering PDF preview:`, error);
+                    const container = canvas.parentElement;
+                    if (container) {
+                        container.innerHTML = `<div class="text-center text-red-500 p-4"><i data-lucide="file-warning" class="mx-auto h-16 w-16"></i><p class="mt-2 text-sm">Errore anteprima PDF</p></div>`;
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            function handleFilePreview(event) {
+                const file = event.target.files[0];
+                const previewContainer = document.getElementById('file-preview-container');
+                const previewEl = document.getElementById('file-preview');
+                ocrBtn.disabled = !file || (!file.type.startsWith('image/') && file.type !== 'application/pdf');
+                if (file) parseFilenameForMetadata(file.name);
+                previewContainer.classList.add('hidden');
+                previewEl.innerHTML = '';
+                if (!file) return;
+                previewContainer.classList.remove('hidden');
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const fileType = file.type || getMimeTypeFromName(file.name);
+                    if (fileType.startsWith('image/')) previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
+                    else if (fileType === 'application/pdf') {
+                        previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
+                        renderPdfToCanvas(previewEl.querySelector('canvas'), e.target.result);
+                    } else {
+                        previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
+                        lucide.createIcons();
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function renderDocuments() {
+                currentPage = 1;
+                Crud.getAll(docs => {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const filteredDocs = docs.filter(doc => {
+                        const inCategoryFilter = (!currentFilter.year || doc.year == currentFilter.year) &&
+                                         (!currentFilter.category || doc.category === currentFilter.category) &&
+                                         (!currentFilter.subcategory || doc.subcategory === currentFilter.subcategory);
+                        const inTagFilter = !activeTagFilter || (doc.tags && doc.tags.includes(activeTagFilter));
+                        const inSearch = searchTerm === '' || 
+                                         doc.displayName.toLowerCase().includes(searchTerm) ||
+                                         doc.category.toLowerCase().includes(searchTerm) ||
+                                         doc.subcategory.toLowerCase().includes(searchTerm) ||
+                                         (doc.details && doc.details.toLowerCase().includes(searchTerm)) ||
+                                         (doc.tags && doc.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                        return inCategoryFilter && inTagFilter && inSearch;
+                    });
+                    filteredDocs.sort((a, b) => {
+                        switch (sortSelect.value) {
+                            case 'name_asc': return a.displayName.localeCompare(b.displayName);
+                            case 'name_desc': return b.displayName.localeCompare(a.displayName);
+                            case 'year_asc': return a.year - b.year;
+                            case 'year_desc': return b.year - a.year;
+                            case 'date_asc': return a.uploadDate - b.uploadDate;
+                            default: return b.uploadDate - a.uploadDate;
+                        }
+                    });
+                    fullFilteredDocs = filteredDocs;
+                    displayCurrentPage();
+                });
+            }
+            
+            function displayCurrentPage(append = false) {
+                if (!append) docListContainer.innerHTML = '';
+                const start = (currentPage - 1) * itemsPerPage;
+                const docsToRender = fullFilteredDocs.slice(start, start + itemsPerPage);
+                if (fullFilteredDocs.length === 0 && !append) {
+                    emptyStateEl.classList.remove('hidden');
+                    loadMoreBtn.classList.add('hidden');
+                } else {
+                    emptyStateEl.classList.add('hidden');
+                    if (currentView === 'list') {
+                        if(!append) docListContainer.className = 'space-y-3';
+                        docsToRender.forEach(createDocCard);
+                    } else {
+                        if(!append) docListContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
+                        docsToRender.forEach(createDocGridItem);
+                    }
+                    loadMoreBtn.classList.toggle('hidden', fullFilteredDocs.length <= start + itemsPerPage);
+                }
+                lucide.createIcons();
+            }
+
+            function createDocCard(doc) {
+                const details = document.createElement('details');
+                details.className = 'bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden';
+                const tagsHTML = doc.tags?.length ? `<strong class="text-gray-500 dark:text-gray-400 col-span-1">Tags:</strong><div class="col-span-3 flex flex-wrap gap-2">${doc.tags.map(tag => `<button class="tag-link bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800" data-tag="${tag}">${tag}</button>`).join('')}</div>` : '';
+                const detailsHTML = doc.details ? `<strong class="text-gray-500 dark:text-gray-400 col-span-1 mt-2">Dettagli:</strong><p class="col-span-3 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${doc.details}</p>` : '';
+                const attachmentsHTML = doc.attachments?.length ? `<strong class="text-gray-500 dark:text-gray-400 col-span-1 mt-2">Allegati:</strong><div class="col-span-3 space-y-1">${doc.attachments.map((att, index) => `<a href="#" class="attachment-link text-blue-600 dark:text-blue-400 hover:underline text-sm flex items-center gap-1" data-doc-id="${doc.id}" data-attachment-index="${index}"><i data-lucide="paperclip" class="w-3 h-3"></i> ${att.fileName}</a>`).join('')}</div>` : '';
+                details.innerHTML = `<summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"><div><span class="font-semibold">${doc.displayName}</span><div class="text-xs text-gray-500">${doc.category} / ${doc.subcategory}</div></div><div class="flex items-center gap-2"><button class="preview-btn p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" data-id="${doc.id}" title="Apri anteprima"><i data-lucide="eye" class="w-5 h-5"></i></button><i data-lucide="chevron-right" class="summary-arrow w-5 h-5"></i></div></summary><div class="details-content max-h-0 bg-gray-50 dark:bg-gray-700/50 p-4 border-t border-gray-200 dark:border-gray-700"><div class="grid grid-cols-4 gap-x-4 gap-y-2 text-sm"><strong class="text-gray-500 dark:text-gray-400">Anno:</strong><span>${doc.year}</span><strong class="text-gray-500 dark:text-gray-400">Caricato:</strong><span>${new Date(doc.uploadDate).toLocaleDateString('it-IT')}</span>${tagsHTML}${detailsHTML}${attachmentsHTML}</div><div class="mt-4 flex justify-end gap-3"><button class="edit-doc-btn text-sm flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline" data-id="${doc.id}"><i data-lucide="edit-2" class="w-4 h-4"></i> Modifica</button><button class="delete-doc-btn text-sm flex items-center gap-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:underline" data-id="${doc.id}"><i data-lucide="trash-2" class="w-4 h-4"></i> Elimina</button></div></div>`;
+                docListContainer.appendChild(details);
+            }
+
+            function createDocGridItem(doc) {
+                const card = document.createElement('div');
+                card.className = 'preview-btn bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer transition-transform transform hover:scale-105';
+                card.dataset.id = doc.id;
+                let previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
+                if (doc.fileType?.startsWith('image/')) previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima"></div>`;
+                else if (doc.fileType === 'application/pdf') {
+                    previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
+                    setTimeout(() => renderPdfToCanvas(document.getElementById(`pdf-canvas-${doc.id}`), doc.fileData, { isThumbnail: true }), 0);
+                }
+                card.innerHTML = `${previewHTML}<div class="p-3 flex-grow flex flex-col"><h3 class="font-semibold text-sm truncate flex-grow" title="${doc.displayName}">${doc.displayName}</h3><p class="text-xs text-gray-500 truncate">${doc.category} / ${doc.subcategory}</p></div>`;
+                docListContainer.appendChild(card);
+                if (!doc.fileType || !doc.fileType.startsWith('image/')) lucide.createIcons({nodes: [card]});
+            }
+
+            function renderFilterTree() {
+                Crud.getAll(docs => {
+                    const tree = docs.reduce((acc, doc) => {
+                        acc[doc.year] = acc[doc.year] || {};
+                        acc[doc.year][doc.category] = acc[doc.year][doc.category] || new Set();
+                        if(doc.subcategory) acc[doc.year][doc.category].add(doc.subcategory);
+                        return acc;
+                    }, {});
+                    let html = '';
+                    Object.keys(tree).sort((a, b) => b - a).forEach(year => {
+                        const isYearActive = currentFilter.year == year && !currentFilter.category, isYearInPath = currentFilter.year == year;
+                        html += `<details ${isYearInPath ? 'open' : ''}><summary class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isYearActive ? 'active' : ''}" data-filter-type="year" data-filter-value="${year}"><span>${year}</span></summary><ul class="pl-4 ml-1 border-l border-gray-200 dark:border-gray-700">`;
+                        Object.keys(tree[year]).sort().forEach(category => {
+                            const isCatActive = currentFilter.year == year && currentFilter.category === category && !currentFilter.subcategory, isCatInPath = isYearInPath && currentFilter.category === category;
+                            html += `<li><details ${isCatInPath ? 'open' : ''}><summary class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isCatActive ? 'active' : ''}" data-filter-type="category" data-filter-value="${category}" data-filter-parent-year="${year}"><span>${category}</span></summary><ul class="pl-4 ml-1 border-l border-gray-200 dark:border-gray-700">${[...tree[year][category]].sort().map(subcategory => `<li class="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 ${isCatInPath && currentFilter.subcategory === subcategory ? 'active' : ''}" data-filter-type="subcategory" data-filter-value="${subcategory}" data-filter-parent-year="${year}" data-filter-parent-category="${category}"><span>${subcategory}</span></li>`).join('')}</ul></details></li>`;
+                        });
+                        html += '</ul></details>';
+                    });
+                    filterTreeEl.innerHTML = html;
+                });
+            }
+            
+            function updateDatalists() {
+                Crud.getAll(docs => {
+                    const categories = new Set(), subcategories = new Set(), allTags = new Set();
+                    docs.forEach(doc => {
+                        if (doc.category) categories.add(doc.category);
+                        if (doc.subcategory) subcategories.add(doc.subcategory);
+                        doc.tags?.forEach(tag => allTags.add(tag));
+                    });
+                    const populate = (datalist, items) => { datalist.innerHTML = [...items].sort().map(item => `<option value="${item}">`).join(''); };
+                    populate(categorySuggestions, categories);
+                    populate(subcategorySuggestions, subcategories);
+                    populate(tagsSuggestions, allTags);
+                    allKnownTags = allTags;
+                });
+            }
+
+            function updateTagsUI() {
+                if (!selectedTagsContainer) return;
+                docTagsHiddenInput.value = [...currentTagsSet].join(', ');
+                while (selectedTagsContainer.firstChild && selectedTagsContainer.firstChild !== docTagsInput) selectedTagsContainer.removeChild(selectedTagsContainer.firstChild);
+                currentTagsSet.forEach(tag => {
+                    const tagEl = document.createElement('span');
+                    tagEl.className = 'flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium pl-2.5 pr-1 py-0.5 rounded-full';
+                    tagEl.innerHTML = `${tag}<button type="button" class="remove-tag-btn rounded-full hover:bg-blue-200 dark:hover:bg-blue-700 p-0.5" data-tag="${tag}"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                    selectedTagsContainer.insertBefore(tagEl, docTagsInput);
+                });
+                availableTagsContainer.innerHTML = '';
+                if (categoryScopedTags.size > 0) {
+                    const availableTags = [...categoryScopedTags].filter(t => !currentTagsSet.has(t)).sort();
+                    if (availableTags.length > 0) {
+                        availableTags.forEach(tag => {
+                            const tagBtn = document.createElement('button');
+                            tagBtn.type = 'button';
+                            tagBtn.className = 'add-tag-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-2 py-1 rounded-md';
+                            tagBtn.textContent = tag;
+                            tagBtn.dataset.tag = tag;
+                            availableTagsContainer.appendChild(tagBtn);
+                        });
+                        availableTagsSection.classList.remove('hidden');
+                    } else availableTagsSection.classList.add('hidden');
+                } else availableTagsSection.classList.add('hidden');
+                lucide.createIcons();
+            }
+            
+            async function updateCategoryScopedTags(category) {
+                if (!category?.trim()) categoryScopedTags = new Set();
+                else {
+                    await new Promise(resolve => {
+                        Crud.getAll(docs => {
+                            const tags = new Set();
+                            docs.filter(doc => doc.category === category).forEach(doc => doc.tags?.forEach(tag => tags.add(tag)));
+                            categoryScopedTags = tags;
+                            resolve();
+                        });
+                    });
+                }
+                updateTagsUI();
+            }
+
+            function addTag(tag) {
+                if (tag.trim()) {
+                    currentTagsSet.add(tag.trim());
+                    updateTagsUI();
+                }
+            }
+            
+            function renderStats() {
+                Crud.getAll(docs => {
+                    statsTotalDocs.textContent = docs.length;
+                    let totalSize = docs.reduce((acc, doc) => acc + (getBase64Size(doc.fileData) || 0) + (doc.attachments || []).reduce((attAcc, att) => attAcc + (getBase64Size(att.fileData) || 0), 0), 0);
+                    statsTotalSize.textContent = formatBytes(totalSize);
+                });
+            }
+            
+            const renderPreviewContent = async (fileData, fileType, fileName) => {
+                previewContent.innerHTML = `<div class="text-white"><div class="ocr-loader mx-auto"></div><p class="mt-2">Caricamento anteprima...</p></div>`;
+                try {
+                    if (fileType.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = fileData;
+                        img.className = 'max-w-full max-h-full object-contain';
+                        previewContent.innerHTML = ''; previewContent.appendChild(img);
+                    } else if (fileType === 'application/pdf') {
+                        const canvas = document.createElement('canvas');
+                        canvas.className = 'max-w-full max-h-full object-contain bg-white rounded-md shadow-lg';
+                        previewContent.innerHTML = ''; previewContent.appendChild(canvas);
+                        await renderPdfToCanvas(canvas, fileData, { isModal: true });
+                    } else if (fileType.endsWith('.document') || fileName.endsWith('.docx')) {
+                        const docContainer = document.createElement('div');
+                        docContainer.className = "bg-white p-8 rounded-md w-full h-full overflow-y-auto text-black";
+                        previewContent.innerHTML = ''; previewContent.appendChild(docContainer);
+                        await window.docx.renderAsync(dataURLtoBlob(fileData), docContainer);
+                    } else if (fileType.endsWith('.sheet') || fileName.endsWith('.xlsx')) {
+                        const excelContainer = document.createElement('div');
+                        excelContainer.className = 'excel-preview-container';
+                        previewContent.innerHTML = ''; previewContent.appendChild(excelContainer);
+                        const arrayBuffer = await dataURLtoBlob(fileData).arrayBuffer();
+                        const workbook = XLSX.read(new Uint8Array(arrayBuffer), {type:"array"});
+                        excelContainer.innerHTML = XLSX.utils.sheet_to_html(workbook.Sheets[workbook.SheetNames[0]]);
+                    } else throw new Error("Anteprima non disponibile");
+                } catch (error) {
+                    console.error("Errore anteprima:", error);
+                    previewContent.innerHTML = `<div class="text-center text-white p-8"><i data-lucide="file-warning" class="mx-auto h-32 w-32 text-yellow-400"></i><p class="mt-4">Anteprima non disponibile per ${fileName}</p><p class="text-xs text-gray-400 mt-1">${error.message}</p></div>`;
+                    lucide.createIcons();
+                }
+            };
+
+            function showPreviewModal(docId, attachmentIndex = -1) {
+                Crud.get(docId, doc => {
+                    if(!doc) return;
+                    currentPreviewDoc = doc;
+                    previewTitle.textContent = doc.displayName;
+                    const fileToShow = (attachmentIndex > -1 && doc.attachments?.[attachmentIndex])
+                        ? { data: doc.attachments[attachmentIndex].fileData, type: doc.attachments[attachmentIndex].fileType, name: doc.attachments[attachmentIndex].fileName }
+                        : { data: doc.fileData, type: doc.fileType, name: doc.fileName };
+                    renderPreviewContent(fileToShow.data, fileToShow.type, fileToShow.name);
+                    if (doc.attachments?.length > 0) {
+                        previewAttachmentsBar.innerHTML = `<button class="attachment-preview-btn inline-block p-2 rounded-md hover:bg-gray-600 ${attachmentIndex === -1 ? 'bg-blue-600' : ''}" data-index="-1">${doc.fileName} (Principale)</button>` + doc.attachments.map((att, index) => `<button class="attachment-preview-btn inline-block p-2 rounded-md hover:bg-gray-600 ${attachmentIndex === index ? 'bg-blue-600' : ''}" data-index="${index}">${att.fileName}</button>`).join('');
+                        previewAttachmentsBar.classList.remove('hidden');
+                    } else previewAttachmentsBar.classList.add('hidden');
+                    openModal(previewModal);
+                });
+            }
+            
+            const openAddModal = () => {
+                editingDocId = null;
+                docForm.reset();
+                clearAllHighlights();
+                attachmentsToAdd = [];
+                attachmentsListEl.innerHTML = '';
+                currentFileNameEl.textContent = '';
+                fileInput.setAttribute('required', 'true');
+                modalTitle.textContent = "Aggiungi Documento";
+                ocrBtn.disabled = true;
+                ocrStatusEl.innerHTML = '';
+                currentTagsSet = new Set();
+                updateCategoryScopedTags('');
+                openModal(docModal);
+            }
+
+            const openEditModal = (docId) => {
+                Crud.get(docId, doc => {
+                    if (!doc) return;
+                    editingDocId = doc.id;
+                    docForm.reset();
+                    clearAllHighlights();
+                    attachmentsToAdd = [];
+                    modalTitle.textContent = "Modifica Documento";
+                    docIdInput.value = doc.id;
+                    docForm['doc-name'].value = doc.displayName;
+                    docForm['doc-year'].value = doc.year;
+                    docForm['doc-category'].value = doc.category;
+                    docForm['doc-subcategory'].value = doc.subcategory;
+                    docForm['doc-details'].value = doc.details || '';
+                    currentTagsSet = new Set(doc.tags || []);
+                    updateCategoryScopedTags(doc.category);
+                    currentFileNameEl.textContent = `File attuale: ${doc.fileName}. Selezionane uno nuovo per sostituirlo.`;
+                    fileInput.removeAttribute('required');
+                    ocrBtn.disabled = true;
+                    ocrStatusEl.innerHTML = '';
+                    attachmentsListEl.innerHTML = (doc.attachments || []).map((att, index) => `<div class="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-1 rounded"><span>${att.fileName}</span><button type="button" class="remove-attachment-btn text-red-500 p-1" data-index="${index}"><i data-lucide="x" class="w-4 h-4"></i></button></div>`).join('');
+                    lucide.createIcons();
+                    openModal(docModal);
+                });
+            };
+
+            function showSnackbar(message, isError = false) {
+                const el = document.getElementById('snackbar');
+                el.textContent = message;
+                el.style.backgroundColor = isError ? '#ef4444' : ''; 
+                el.style.opacity = '1';
+                setTimeout(() => { el.style.opacity = '0'; }, 3000);
+            }
+            
+            const openModal = (modalEl) => modalEl.classList.remove('hidden');
+            const closeModal = (modalEl) => {
+                modalEl.classList.add('hidden');
+                if (modalEl === docModal) handleFilePreview({ target: { files: [] } });
+            };
+
+            function updateViewButtons(view) {
+                viewListBtn.classList.toggle('text-blue-500', view === 'list');
+                viewListBtn.classList.toggle('bg-blue-50', view === 'list');
+                viewListBtn.classList.toggle('dark:bg-gray-700', view === 'list');
+                viewGridBtn.classList.toggle('text-blue-500', view === 'grid');
+                viewGridBtn.classList.toggle('bg-blue-50', view === 'grid');
+                viewGridBtn.classList.toggle('dark:bg-gray-700', view === 'grid');
+            }
+
+            function setView(view) {
+                currentView = view;
+                localStorage.setItem('doc-view', view);
+                updateViewButtons(view);
+                renderDocuments();
+            }
+
+            const applyTheme = (theme) => document.documentElement.classList.toggle('dark', theme === 'dark');
+            themeToggleBtn.addEventListener('click', () => {
+                const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+
+            const closeSidebar = () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            };
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            });
+            overlay.addEventListener('click', closeSidebar);
+            closeSidebarBtn.addEventListener('click', closeSidebar);
+            resetFilterBtn.addEventListener('click', () => {
+                currentFilter = {}; activeTagFilter = null; renderAll();
+            });
+
+            filterTreeEl.addEventListener('click', e => {
+                const target = e.target.closest('summary, li[data-filter-type="subcategory"]');
+                if (!target) return;
+                e.preventDefault();
+                const { filterType, filterValue, filterParentYear, filterParentCategory } = target.dataset;
+                if (filterType === 'subcategory') {
+                    currentFilter = { year: filterParentYear, category: filterParentCategory, subcategory: filterValue };
+                    closeSidebar();
+                } else if (target.tagName === 'SUMMARY') {
+                    const isYearActive = currentFilter.year == filterValue && !currentFilter.category;
+                    const isCatActive = currentFilter.year == filterParentYear && currentFilter.category === filterValue && !currentFilter.subcategory;
+                    if (isYearActive) currentFilter = {};
+                    else if (isCatActive) currentFilter = { year: filterParentYear };
+                    else {
+                        if (filterType === 'year') currentFilter = { year: filterValue };
+                        else if (filterType === 'category') currentFilter = { year: filterParentYear, category: filterValue };
+                    }
+                    if(!target.parentElement.hasAttribute('open')) target.parentElement.setAttribute('open', '');
+                }
+                renderAll();
+            });
+
+            addDocBtn.addEventListener('click', openAddModal);
+            cancelBtn.addEventListener('click', () => closeModal(docModal));
+            fileInput.addEventListener('change', handleFilePreview);
+            ocrBtn.addEventListener('click', runOCR);
+            
+            attachmentsInput.addEventListener('change', (e) => {
+                attachmentsToAdd = [...e.target.files];
+                attachmentsListEl.innerHTML += attachmentsToAdd.map(file => `<div class="bg-blue-100 dark:bg-blue-900 p-1 rounded">Nuovo: ${file.name}</div>`).join('');
+            });
+
+            attachmentsListEl.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-attachment-btn')) {
+                    Crud.get(editingDocId, doc => {
+                        doc.attachments.splice(parseInt(e.target.closest('.remove-attachment-btn').dataset.index), 1);
+                        Crud.save(doc, false).then(() => openEditModal(editingDocId));
+                    });
+                }
+            });
+
+            docForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const saveButton = e.submitter || docForm.querySelector('button[type="submit"]');
+                const originalButtonHTML = saveButton.innerHTML;
+                saveButton.disabled = true; saveButton.innerHTML = `<div class="ocr-loader mx-auto"></div>`;
+                try {
+                    let fileHash = null;
+                    if (fileInput.files[0]) {
+                        fileHash = await calculateFileHash(fileInput.files[0]);
+                        const existingDoc = await checkForDuplicate(fileHash);
+                        if (existingDoc && (!editingDocId || existingDoc.id != editingDocId)) {
+                            throw new Error(`Questo file esiste già: "${existingDoc.displayName}"`);
+                        }
+                    }
+                    const processSubmit = async (baseDoc) => {
+                        const newAttachments = await Promise.all(attachmentsToAdd.map(readFileAsDataURL));
+                        baseDoc.attachments = [...(baseDoc.attachments || []), ...newAttachments];
+                        const docData = { ...baseDoc,
+                            displayName: docForm['doc-name'].value, year: parseInt(docForm['doc-year'].value),
+                            category: docForm['doc-category'].value, subcategory: docForm['doc-subcategory'].value,
+                            tags: docTagsHiddenInput.value.split(',').map(t => t.trim()).filter(Boolean),
+                            details: docForm['doc-details'].value,
+                            uploadDate: editingDocId ? baseDoc.uploadDate : new Date().getTime(),
+                        };
+                        if (fileHash) docData.contentHash = fileHash;
+                        await Crud.save(docData);
+                    };
+                    if (editingDocId) {
+                        await new Promise((resolve, reject) => Crud.get(editingDocId, async (doc) => {
+                            try {
+                                if (!doc) return reject(new Error("Doc da modificare non trovato."));
+                                let docToProcess = { ...doc };
+                                if (fileInput.files[0]) {
+                                    const { fileData, fileName, fileType } = await readFileAsDataURL(fileInput.files[0]);
+                                    docToProcess = { ...docToProcess, fileData, fileName, fileType };
+                                }
+                                await processSubmit(docToProcess);
+                                resolve();
+                            } catch (err) { reject(err); }
+                        }));
+                    } else {
+                        if (!fileInput.files[0]) throw new Error("Seleziona un file principale.");
+                        const { fileData, fileName, fileType } = await readFileAsDataURL(fileInput.files[0]);
+                        await processSubmit({ fileData, fileName, fileType, attachments: [] });
+                    }
+                } catch (error) {
+                    console.error("Errore salvataggio:", error);
+                    showSnackbar(error.message || "Errore nel salvataggio.", true);
+                } finally {
+                    saveButton.disabled = false; saveButton.innerHTML = originalButtonHTML;
+                }
+            });
+            
+            docListContainer.addEventListener('click', (e) => {
+                const target = e.target.closest('.preview-btn, .edit-doc-btn, .attachment-link, .tag-link, .delete-doc-btn');
+                if (!target) return;
+                e.preventDefault();
+                const id = target.dataset.id || target.dataset.docId;
+                if (target.matches('.delete-doc-btn')) { docIdToDelete = parseInt(id); openModal(confirmDeleteModal); }
+                else if (target.matches('.tag-link')) { activeTagFilter = target.dataset.tag; renderAll(); }
+                else if (target.matches('.attachment-link')) showPreviewModal(id, parseInt(target.dataset.attachmentIndex));
+                else if (target.matches('.edit-doc-btn')) openEditModal(id);
+                else if (target.matches('.preview-btn')) showPreviewModal(id);
+            });
+
+            docTagsInput.addEventListener('keydown', e => {
+                if (e.key === ',' || e.key === 'Enter') {
+                    e.preventDefault(); addTag(docTagsInput.value); docTagsInput.value = '';
+                }
+            });
+            selectedTagsContainer.addEventListener('click', e => {
+                const removeBtn = e.target.closest('.remove-tag-btn');
+                if (removeBtn) { currentTagsSet.delete(removeBtn.dataset.tag); updateTagsUI(); }
+                else docTagsInput.focus();
+            });
+            availableTagsContainer.addEventListener('click', e => { if (e.target.closest('.add-tag-btn')) addTag(e.target.dataset.tag); });
+            categoryInput.addEventListener('input', (e) => updateCategoryScopedTags(e.target.value));
+
+            closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
+            
+            printBtn.addEventListener('click', () => {
+                const contentEl = previewContent.querySelector('canvas, img, div.docx-wrapper, div.excel-preview-container');
+                if (contentEl) {
+                    const printWindow = window.open('', '_blank');
+                    if(contentEl.matches('canvas, img')) {
+                        const dataUrl = contentEl.tagName === 'CANVAS' ? contentEl.toDataURL('image/png') : contentEl.src;
+                        printWindow.document.write(`<html><body style="text-align:center;"><img src="${dataUrl}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
+                    } else {
+                        printWindow.document.write('<html><head><title>Stampa Documento</title></head><body>' + contentEl.innerHTML + '</body></html>');
+                    }
+                    printWindow.document.close(); printWindow.focus();
+                } else showSnackbar("Stampa non disponibile per questo file.", true);
+            });
+
+            editPreviewBtn.addEventListener('click', () => { if (currentPreviewDoc) { closeModal(previewModal); openEditModal(currentPreviewDoc.id); } });
+            deletePreviewBtn.addEventListener('click', () => { if (currentPreviewDoc) { docIdToDelete = currentPreviewDoc.id; openModal(confirmDeleteModal); } });
+            downloadBtn.addEventListener('click', () => {
+                if(currentPreviewDoc){
+                    const a = document.createElement('a');
+                    const idx = parseInt(previewAttachmentsBar.querySelector('.bg-blue-600')?.dataset.index ?? -1);
+                    const file = (idx === -1) 
+                        ? { data: currentPreviewDoc.fileData, name: currentPreviewDoc.fileName }
+                        : { data: currentPreviewDoc.attachments[idx].fileData, name: currentPreviewDoc.attachments[idx].fileName };
+                    a.href = file.data; a.download = file.name; a.click();
+                }
+            });
+            previewAttachmentsBar.addEventListener('click', (e) => { if (e.target.closest('.attachment-preview-btn')) showPreviewModal(currentPreviewDoc.id, parseInt(e.target.dataset.index)); });
+            
+            cancelDeleteBtn.addEventListener('click', () => { docIdToDelete = null; closeModal(confirmDeleteModal); });
+            confirmDeleteBtn.addEventListener('click', () => { if (docIdToDelete) { Crud.delete(docIdToDelete); docIdToDelete = null; closeModal(confirmDeleteModal); } });
+
+            exportBtn.addEventListener('click', () => {
+                Crud.getAll(async (docs) => {
+                    if (docs.length === 0) return showSnackbar("Nessun documento da esportare.");
+                    showSnackbar("Creazione del backup in corso...");
+                    try {
+                        const zip = new JSZip(); const metadata = [];
+                        for (const doc of docs) {
+                            const docMetadata = { ...doc };
+                            const mainFileName = `${doc.id}-${doc.fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+                            docMetadata.filePath = `files/${mainFileName}`;
+                            zip.file(docMetadata.filePath, dataURLtoBlob(doc.fileData)); delete docMetadata.fileData;
+                            if (doc.attachments?.length) {
+                                docMetadata.attachments = doc.attachments.map((att, i) => {
+                                    const attMetadata = { ...att };
+                                    const attFileName = `${doc.id}-att-${i}-${att.fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+                                    attMetadata.filePath = `files/${attFileName}`;
+                                    zip.file(attMetadata.filePath, dataURLtoBlob(att.fileData)); delete attMetadata.fileData;
+                                    return attMetadata;
+                                });
+                            }
+                            metadata.push(docMetadata);
+                        }
+                        zip.file("metadata.json", JSON.stringify(metadata, null, 2));
+                        const zipBlob = await zip.generateAsync({ type: "blob" });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(zipBlob); a.download = 'backup_documenti.zip'; a.click();
+                        URL.revokeObjectURL(a.href); showSnackbar("Esportazione completata.");
+                    } catch (err) { showSnackbar("Errore durante l'esportazione.", true); console.error(err); }
+                });
+            });
+
+            importBtn.addEventListener('click', () => importFileInput.click());
+            importFileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0]; if (!file) return;
+                showSnackbar("Importazione in corso...");
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const zip = await JSZip.loadAsync(e.target.result);
+                        const metadataFile = zip.file("metadata.json");
+                        if (!metadataFile) throw new Error("File metadata.json non trovato.");
+                        const metadata = JSON.parse(await metadataFile.async("string"));
+                        Crud.clear(async () => {
+                            showSnackbar(`Importazione di ${metadata.length} documenti...`);
+                            for (const docMeta of metadata) {
+                                 if (!zip.file(docMeta.filePath)) continue;
+                                 const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
+                                 docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
+                                 docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
+                                 delete docMeta.filePath;
+                                 if (docMeta.attachments) {
+                                    for(let attMeta of docMeta.attachments) {
+                                        if (!zip.file(attMeta.filePath)) continue;
+                                        const attFileBlob = await zip.file(attMeta.filePath).async("blob");
+                                        attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
+                                        attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
+                                        delete attMeta.filePath;
+                                    }
+                                 }
+                                 delete docMeta.id;
+                                 docMeta.contentHash = await calculateFileHash(new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType }));
+                                 db.transaction("documents", "readwrite").objectStore("documents").put(docMeta);
+                            }
+                            showSnackbar('Importazione completata!'); renderAll();
+                        });
+                    } catch (error) { showSnackbar("Errore: il file di backup non è valido.", true); console.error("Import error:", error); }
+                    finally { importFileInput.value = ''; }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            searchInput.addEventListener('input', renderDocuments);
+            sortSelect.addEventListener('change', renderDocuments);
+            itemsPerPageSelect.addEventListener('change', (e) => { itemsPerPage = parseInt(e.target.value, 10); renderDocuments(); });
+            loadMoreBtn.addEventListener('click', () => { currentPage++; displayCurrentPage(true); });
+            viewListBtn.addEventListener('click', () => setView('list'));
+            viewGridBtn.addEventListener('click', () => setView('grid'));
+            fieldsToHighlight.forEach(field => {
+                const removeHighlight = () => field.classList.remove('highlight-suggestion');
+                field.addEventListener('input', removeHighlight);
+                field.addEventListener('focus', removeHighlight);
+            });
+            
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => console.error(err));
+                else if (document.exitFullscreen) document.exitFullscreen();
+            });
+            document.addEventListener('fullscreenchange', () => {
+                const isFullscreen = !!document.fullscreenElement;
+                fullscreenBtn.querySelector('[data-lucide="maximize"]').classList.toggle('hidden', isFullscreen);
+                fullscreenBtn.querySelector('[data-lucide="minimize"]').classList.toggle('hidden', !isFullscreen);
+            });
+
+            // --- Inizializzazione ---
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+            updateViewButtons(currentView);
+            initDB();
+            lucide.createIcons();
+        }
+
+        // --- Avvio dell'applicazione ---
+        window.addEventListener('load', () => {
+            const requiredLibs = ['pdfjsLib', 'Tesseract', 'JSZip', 'lucide', 'docx', 'XLSX'];
+            let retries = 0;
+            const checkInterval = setInterval(() => {
+                const missingLibs = requiredLibs.filter(lib => typeof window[lib] === 'undefined');
+                if (missingLibs.length === 0) {
+                    clearInterval(checkInterval);
+                    initializeApp(); // Avvia l'app solo quando le librerie sono pronte
+                } else if (++retries > 20) {
+                    clearInterval(checkInterval);
+                    document.getElementById('missing-libs-list').textContent = `Dettagli: ${missingLibs.join(', ')} non trovate.`;
+                    document.getElementById('load-error-modal').classList.remove('hidden');
+                    if (window.lucide) lucide.createIcons();
+                    document.getElementById('reload-page-btn').onclick = () => window.location.reload();
+                }
+            }, 500);
+        });
+    }
     </script>
 </body>
 </html>
