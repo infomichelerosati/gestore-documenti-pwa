@@ -176,6 +176,11 @@
                         <i data-lucide="sun" class="w-6 h-6 block dark:hidden"></i>
                         <i data-lucide="moon" class="w-6 h-6 hidden dark:block"></i>
                     </button>
+                    <!-- Pulsante Fullscreen Aggiunto -->
+                    <button id="fullscreen-btn" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <i data-lucide="maximize" class="w-6 h-6 block"></i>
+                        <i data-lucide="minimize" class="w-6 h-6 hidden"></i>
+                    </button>
                     <button id="installBtn" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
                         Installa App
                     </button>
@@ -395,6 +400,7 @@
         const importBtn = document.getElementById('import-data-btn');
         const importFileInput = document.getElementById('import-file-input');
         const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn'); // Elemento Fullscreen
         const viewListBtn = document.getElementById('view-list-btn');
         const viewGridBtn = document.getElementById('view-grid-btn');
         const statsTotalDocs = document.getElementById('stats-total-docs');
@@ -1723,7 +1729,33 @@
             field.addEventListener('input', removeHighlight);
             field.addEventListener('focus', removeHighlight);
         });
+        
+        // --- Logica Fullscreen Aggiunta ---
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Errore nell'attivare la modalità a schermo intero: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
 
+        document.addEventListener('fullscreenchange', () => {
+            const maximizeIcon = fullscreenBtn.querySelector('[data-lucide="maximize"]');
+            const minimizeIcon = fullscreenBtn.querySelector('[data-lucide="minimize"]');
+            if (document.fullscreenElement) {
+                maximizeIcon.classList.add('hidden');
+                minimizeIcon.classList.remove('hidden');
+            } else {
+                maximizeIcon.classList.remove('hidden');
+                minimizeIcon.classList.add('hidden');
+            }
+        });
+
+        // --- Inizializzazione ---
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(savedTheme);
         updateViewButtons(currentView);
