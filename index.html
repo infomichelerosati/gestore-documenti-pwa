@@ -594,6 +594,29 @@
             return bestScore;
         }
 
+        // --- NUOVA FUNZIONE HELPER per determinare il tipo MIME dal nome file ---
+        function getMimeTypeFromName(fileName) {
+            if (!fileName || !fileName.includes('.')) return 'application/octet-stream';
+            const extension = fileName.split('.').pop().toLowerCase();
+            switch (extension) {
+                case 'jpg':
+                case 'jpeg':
+                    return 'image/jpeg';
+                case 'png':
+                    return 'image/png';
+                case 'gif':
+                    return 'image/gif';
+                case 'webp':
+                    return 'image/webp';
+                case 'svg':
+                    return 'image/svg+xml';
+                case 'pdf':
+                    return 'application/pdf';
+                default:
+                    return 'application/octet-stream';
+            }
+        }
+
         function getExistingCategoriesAndSubcategories() {
             return new Promise(resolve => {
                 Crud.getAll(docs => {
@@ -1788,22 +1811,41 @@
             reader.onload = async (e) => {
                 try {
                     const zip = await JSZip.loadAsync(e.target.result);
-                    const metadata = JSON.parse(await zip.file("metadata.json").async("string"));
+                    const metadataFile = zip.file("metadata.json");
+                    if (!metadataFile) {
+                        throw new Error("File metadata.json non trovato nel backup.");
+                    }
+                    const metadata = JSON.parse(await metadataFile.async("string"));
+
                     Crud.clear(async () => {
                         showSnackbar(`Importazione di ${metadata.length} documenti...`);
                         for (const docMeta of metadata) {
+                             if (!zip.file(docMeta.filePath)) {
+                                console.warn(`File ${docMeta.filePath} non trovato nel backup per il documento "${docMeta.displayName}". Salto.`);
+                                continue;
+                             }
                              const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
                              const mainFileInfo = await readFileAsDataURL(mainFileBlob);
                              docMeta.fileData = mainFileInfo.fileData;
-                             docMeta.fileType = mainFileInfo.fileType;
+                             
+                             // FIX: Infer file type if missing
+                             docMeta.fileType = mainFileInfo.fileType || getMimeTypeFromName(docMeta.fileName);
+                             
                              delete docMeta.filePath;
                              
                              if (docMeta.attachments && docMeta.attachments.length > 0) {
                                 for(let attMeta of docMeta.attachments) {
+                                    if (!zip.file(attMeta.filePath)) {
+                                       console.warn(`File allegato ${attMeta.filePath} non trovato. Salto.`);
+                                       continue;
+                                    }
                                     const attFileBlob = await zip.file(attMeta.filePath).async("blob");
                                     const attFileInfo = await readFileAsDataURL(attFileBlob);
                                     attMeta.fileData = attFileInfo.fileData;
-                                    attMeta.fileType = attFileInfo.fileType;
+
+                                    // FIX: Infer file type for attachments if missing
+                                    attMeta.fileType = attFileInfo.fileType || getMimeTypeFromName(attMeta.fileName);
+                                    
                                     delete attMeta.filePath;
                                 }
                              }
@@ -1818,7 +1860,7 @@
                         renderAll();
                     });
                 } catch (error) {
-                    showSnackbar("Errore: il file di backup non è valido.", true);
+                    showSnackbar("Errore: il file di backup non è valido o è corrotto.", true);
                     console.error("Import error:", error);
                 } finally {
                     importFileInput.value = ''; 
@@ -1899,17 +1941,27 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
-        // --- LOGICA DI INSTALLAZIONE PWA ---
+        // --- LOGICA DI INSTALLAZIONE PWA (MIGLIORATA) ---
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
 
+        // Controlla se l'app è già in esecuzione in modalità standalone
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+             console.log("App in esecuzione in modalità standalone, nascondo il pulsante di installazione.");
+             if(installBtn) installBtn.classList.add('hidden');
+        } else {
+            console.log("App in esecuzione nel browser.");
+        }
+        
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('Evento "beforeinstallprompt" intercettato.');
             // Previene la visualizzazione del prompt di installazione nativo
             e.preventDefault();
             // Salva l'evento per poterlo attivare in seguito
             deferredPrompt = e;
             // Mostra il nostro pulsante di installazione personalizzato
             if (installBtn) {
+                console.log("Mostro il pulsante di installazione personalizzato.");
                 installBtn.classList.remove('hidden');
             }
         });
@@ -1917,19 +1969,22 @@
         if (installBtn) {
             installBtn.addEventListener('click', () => {
                 if (deferredPrompt) {
+                    console.log("L'utente ha cliccato sul pulsante di installazione.");
+                    // Nasconde il nostro pulsante
+                    installBtn.classList.add('hidden');
                     // Mostra il prompt di installazione
                     deferredPrompt.prompt();
                     // Aspetta la scelta dell'utente
                     deferredPrompt.userChoice.then((choiceResult) => {
                         if (choiceResult.outcome === 'accepted') {
-                            console.log('User accepted the A2HS prompt');
+                            console.log('L\'utente ha accettato l\'installazione');
                         } else {
-                            console.log('User dismissed the A2HS prompt');
+                            console.log('L\'utente ha rifiutato l\'installazione');
                         }
-                        // Nasconde il pulsante dopo l'interazione
-                        installBtn.classList.add('hidden');
                         deferredPrompt = null;
                     });
+                } else {
+                    console.log("Nessun evento di installazione disponibile.");
                 }
             });
         }
@@ -2008,9 +2063,9 @@
             const swUrl = URL.createObjectURL(swBlob);
 
             // Registriamo il Service Worker usando l'URL del file virtuale.
-            navigator.serviceWorker.register(swUrl)
+            navigator.serviceWorker.register(swUrl, { scope: './' })
                 .then(registration => {
-                    console.log('Service Worker registrato con successo:', registration.scope);
+                    console.log('Service Worker registrato con successo con scope:', registration.scope);
                 })
                 .catch(error => {
                     console.error('Registrazione del Service Worker fallita:', error);
@@ -2020,3 +2075,4 @@
     </script>
 </body>
 </html>
+
