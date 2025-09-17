@@ -275,7 +275,7 @@
                 
                 <div id="file-preview-container" class="mb-4 hidden">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Anteprima</label>
-                    <div id="file-preview" class="mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 max-h-48 overflow-y-auto"></div>
+                    <div id="file-preview" class="mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 max-h-48 overflow-y-auto flex justify-center items-center"></div>
                 </div>
                 
                 <div class="mb-4">
@@ -362,7 +362,7 @@
     <script>
     // --- Funzione principale dell'applicazione ---
     function initializeApp() {
-        console.log("VERSIONE POTENZIATA CARICATA - Avvio dell'app.");
+        console.log("VERSIONE POTENZIATA E CORRETTA CARICATA - Avvio dell'app.");
         
         // --- Inizializzazione PDF.js Worker ---
         if (window.pdfjsLib) {
@@ -928,7 +928,62 @@
                 highlightField(detailsInput);
             }
         }
+        
+        // --- START: MODIFIED PDF RENDERING LOGIC ---
+        /**
+         * Renders the first page of a PDF file onto a given canvas element.
+         * @param {HTMLCanvasElement} canvas The canvas to render on.
+         * @param {string} fileData The base64 data URL of the PDF file.
+         * @param {object} [options={}] Optional settings for rendering.
+         * @param {boolean} [options.isThumbnail=false] - If true, renders a small thumbnail.
+         * @param {boolean} [options.isModal=false] - If true, scales to fit the container for modal preview.
+         */
+        async function renderPdfToCanvas(canvas, fileData, options = {}) {
+            if (!canvas || !fileData) return;
 
+            try {
+                const pdfjsLib = getPdfjsLib();
+                if (!pdfjsLib) throw new Error("PDF.js library not found");
+
+                const typedarray = new Uint8Array(atob(fileData.split(',')[1]).split('').map(char => char.charCodeAt(0)));
+                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                const page = await pdf.getPage(1);
+                
+                let scale = 1.0;
+                const viewport = page.getViewport({ scale: scale });
+                
+                if (options.isThumbnail) {
+                    const desiredHeight = 128; // Standard thumbnail height
+                    scale = desiredHeight / viewport.height;
+                } else if (options.isModal) {
+                    // Scale to fit parent container in modal, respecting aspect ratio
+                    const container = canvas.parentElement;
+                    if (container) {
+                         const maxWidth = container.clientWidth;
+                         const maxHeight = container.clientHeight;
+                         scale = Math.min(maxWidth / viewport.width, maxHeight / viewport.height);
+                    }
+                } else { // Form preview
+                    const desiredWidth = canvas.parentElement.clientWidth - 20; // Fit inside the preview box padding
+                    scale = desiredWidth / viewport.width;
+                }
+
+                const scaledViewport = page.getViewport({ scale: scale });
+                const context = canvas.getContext('2d');
+                canvas.height = scaledViewport.height;
+                canvas.width = scaledViewport.width;
+
+                await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
+
+            } catch (error) {
+                console.error(`Error rendering PDF preview:`, error);
+                const container = canvas.parentElement;
+                if (container) {
+                    container.innerHTML = `<div class="text-center text-red-500 p-4"><i data-lucide="file-warning" class="mx-auto h-16 w-16"></i><p class="mt-2 text-sm">Errore anteprima PDF</p></div>`;
+                    lucide.createIcons();
+                }
+            }
+        }
 
         function handleFilePreview(event) {
             const file = event.target.files[0];
@@ -944,24 +999,25 @@
             if (!file) return;
             previewContainer.classList.remove('hidden');
             const reader = new FileReader();
-            if (file.type.startsWith('image/')) {
-                reader.onload = e => previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full h-auto rounded-md mx-auto">`;
-                reader.readAsDataURL(file);
-            } else if (file.type === 'application/pdf') {
-                reader.onload = e => {
-                    const blob = dataURLtoBlob(e.target.result);
-                    const objectUrl = URL.createObjectURL(blob);
-                    previewEl.innerHTML = `<iframe src="${objectUrl}" class="w-full h-40 border-none"></iframe>`;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
-                lucide.createIcons();
-            }
+            
+            reader.onload = e => {
+                if (file.type.startsWith('image/')) {
+                    previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
+                } else if (file.type === 'application/pdf') {
+                    previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
+                    const canvas = previewEl.querySelector('canvas');
+                    renderPdfToCanvas(canvas, e.target.result);
+                } else {
+                    previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
+                    lucide.createIcons();
+                }
+            };
+            reader.readAsDataURL(file);
         }
+        // --- END: MODIFIED PDF RENDERING LOGIC ---
 
         function renderDocuments() {
-            // Questa funzione ora si occupa solo di ottenere, filtrare e ordinare i dati.
+            // This function now only gets, filters, and sorts the data.
             currentPage = 1;
             
             Crud.getAll(docs => {
@@ -993,8 +1049,8 @@
                     }
                 });
 
-                fullFilteredDocs = filteredDocs; // Memorizza la lista completa e filtrata
-                displayCurrentPage(); // Mostra la prima pagina dei risultati
+                fullFilteredDocs = filteredDocs; // Store the full filtered list
+                displayCurrentPage(); // Display the first page of results
             });
         }
         
@@ -1083,47 +1139,6 @@
             docListContainer.appendChild(details);
         }
 
-        async function renderPdfThumbnail(docId, fileData) {
-            const canvas = document.getElementById(`pdf-canvas-${docId}`);
-            if (!canvas) return;
-
-            try {
-                const pdfjsLib = getPdfjsLib(); 
-                if (!pdfjsLib) return; 
-
-                const blob = dataURLtoBlob(fileData);
-                const arrayBuffer = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(blob);
-                });
-
-                const typedarray = new Uint8Array(arrayBuffer);
-                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                const page = await pdf.getPage(1);
-                
-                const desiredHeight = 128;
-                const viewport = page.getViewport({ scale: 1 });
-                const scale = desiredHeight / viewport.height;
-                const scaledViewport = page.getViewport({ scale });
-
-                const context = canvas.getContext('2d');
-                canvas.height = scaledViewport.height;
-                canvas.width = scaledViewport.width;
-
-                await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
-
-            } catch (error) {
-                console.error(`Error rendering PDF preview for doc ${docId}:`, error);
-                const container = canvas.parentElement;
-                if (container) {
-                    container.innerHTML = `<i data-lucide="file-type-2" class="w-12 h-12 text-red-500"></i>`;
-                    lucide.createIcons();
-                }
-            }
-        }
-
         function createDocGridItem(doc) {
             const card = document.createElement('div');
             card.className = 'preview-btn bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer transition-transform transform hover:scale-105';
@@ -1135,7 +1150,7 @@
                 previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima di ${doc.displayName}"></div>`;
             } else if (doc.fileType === 'application/pdf') {
                 previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
-                setTimeout(() => renderPdfThumbnail(doc.id, doc.fileData), 0);
+                setTimeout(() => renderPdfToCanvas(document.getElementById(`pdf-canvas-${doc.id}`), doc.fileData, { isThumbnail: true }), 0);
             } else {
                 previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
             }
@@ -1284,50 +1299,31 @@
                 statsTotalSize.textContent = formatBytes(totalSize);
             });
         }
-
+        
+        // --- START: MODIFIED PREVIEW CONTENT LOGIC ---
         const renderPreviewContent = (fileData, fileType, fileName) => {
-            previewContent.innerHTML = '';
-            let el;
+            previewContent.innerHTML = ''; // Clear previous content
+            
             if (fileType.startsWith('image/')) {
-                el = document.createElement('img');
-                el.src = fileData;
-                el.className = 'max-w-full max-h-full object-contain';
-                previewContent.appendChild(el);
+                const img = document.createElement('img');
+                img.src = fileData;
+                img.className = 'max-w-full max-h-full object-contain';
+                previewContent.appendChild(img);
             } else if (fileType === 'application/pdf') {
-                const blob = dataURLtoBlob(fileData);
-                if (!blob) {
-                    previewContent.innerHTML = `<div class="text-center text-white p-8"><i data-lucide="alert-triangle" class="mx-auto h-32 w-32 text-yellow-400"></i><p class="mt-4">Errore nel caricare il file per l'anteprima.</p></div>`;
-                    lucide.createIcons();
-                    return;
-                }
-                const objectUrl = URL.createObjectURL(blob);
-                el = document.createElement('iframe');
-                el.src = objectUrl;
-                el.className = 'w-full h-full border-none';
-                
-                // Pulisce l'URL dell'oggetto per evitare memory leak quando la modale si chiude
-                const observer = new MutationObserver((mutationsList, obs) => {
-                    for(const mutation of mutationsList) {
-                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                            if (previewModal.classList.contains('hidden')) {
-                                URL.revokeObjectURL(objectUrl);
-                                obs.disconnect(); // Smette di osservare una volta eseguito
-                                return;
-                            }
-                        }
-                    }
-                });
-                observer.observe(previewModal, { attributes: true });
-
-                previewContent.appendChild(el);
+                const canvas = document.createElement('canvas');
+                canvas.className = 'max-w-full max-h-full object-contain bg-white rounded-md shadow-lg';
+                previewContent.appendChild(canvas);
+                renderPdfToCanvas(canvas, fileData, { isModal: true });
             } else {
-                el = document.createElement('div');
-                el.className = 'text-center text-white p-8';
-                el.innerHTML = `<i data-lucide="file-text" class="mx-auto h-32 w-32"></i><p class="mt-4">Anteprima non disponibile per ${fileName}</p>`;
-                previewContent.appendChild(el);
+                previewContent.innerHTML = `
+                    <div class="text-center text-white p-8">
+                        <i data-lucide="file-text" class="mx-auto h-32 w-32"></i>
+                        <p class="mt-4">Anteprima non disponibile per ${fileName}</p>
+                    </div>`;
                 lucide.createIcons();
             }
         }
+        // --- END: MODIFIED PREVIEW CONTENT LOGIC ---
 
         function showPreviewModal(docId, attachmentIndex = -1) {
             Crud.get(docId, doc => {
@@ -1677,20 +1673,14 @@
         closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
         
         printBtn.addEventListener('click', () => {
-            const previewIframe = previewContent.querySelector('iframe');
+            const previewCanvas = previewContent.querySelector('canvas');
             const previewImage = previewContent.querySelector('img');
 
-            if (previewIframe) { // PDF
-                try {
-                    previewIframe.contentWindow.print();
-                } catch(e) {
-                    showSnackbar("Impossibile stampare. Prova a scaricare il file e stamparlo.", true);
-                    console.error("Print error:", e);
-                }
-            } else if (previewImage) { // Immagine
+            if (previewCanvas || previewImage) { // PDF (rendered on canvas) or Image
+                const dataUrl = previewCanvas ? previewCanvas.toDataURL('image/png') : previewImage.src;
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write('<html><head><title>Stampa Documento</title></head><body style="text-align:center;">');
-                printWindow.document.write('<img src="' + previewImage.src + '" style="max-width:100%;" onload="window.print();window.close();">');
+                printWindow.document.write('<img src="' + dataUrl + '" style="max-width:100%;" onload="window.print();window.close();">');
                 printWindow.document.write('</body></html>');
                 printWindow.document.close();
                 printWindow.focus();
@@ -2030,4 +2020,3 @@
     </script>
 </body>
 </html>
-
