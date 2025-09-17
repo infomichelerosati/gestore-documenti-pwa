@@ -26,6 +26,13 @@
     <!-- Libreria PDF.js per anteprime PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
+    <!-- NUOVE LIBRERIE PER ANTEPRIMA OFFICE -->
+    <!-- Libreria Docx-preview per anteprime Word (.docx) -->
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.js"></script>
+    
+    <!-- Libreria SheetJS (xlsx) per anteprime Excel (.xlsx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <!-- Font Inter da Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,6 +117,30 @@
         @keyframes pulse-light {
             0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
             50%      { transform: translateX(-50%) scale(1.05); opacity: 1; }
+        }
+        /* Stili per anteprima excel */
+        .excel-preview-container {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .excel-preview-container table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.8rem;
+        }
+        .excel-preview-container th, .excel-preview-container td {
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            text-align: left;
+            color: #333;
+        }
+        .excel-preview-container th {
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -571,6 +602,9 @@
                 case 'webp': return 'image/webp';
                 case 'svg': return 'image/svg+xml';
                 case 'pdf': return 'application/pdf';
+                // Aggiungiamo i tipi MIME per i file di Office
+                case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                 default: return 'application/octet-stream';
             }
         }
@@ -608,7 +642,7 @@
                 reader.onload = () => resolve({
                     fileData: reader.result,
                     fileName: file.name,
-                    fileType: file.type
+                    fileType: file.type || getMimeTypeFromName(file.name) // Migliorato per robustezza
                 });
                 reader.onerror = () => {
                     reject(new Error(`Impossibile leggere il file "${file.name}"`));
@@ -952,12 +986,14 @@
             previewContainer.classList.remove('hidden');
             const reader = new FileReader();
             reader.onload = e => {
-                if (file.type.startsWith('image/')) {
+                const fileType = file.type || getMimeTypeFromName(file.name);
+                if (fileType.startsWith('image/')) {
                     previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
-                } else if (file.type === 'application/pdf') {
+                } else if (fileType === 'application/pdf') {
                     previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
                     renderPdfToCanvas(previewEl.querySelector('canvas'), e.target.result);
                 } else {
+                     // Anche i file di office avranno un'icona generica qui per semplicità
                     previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
                     lucide.createIcons();
                 }
@@ -1095,6 +1131,7 @@
                 previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
                 setTimeout(() => renderPdfToCanvas(document.getElementById(`pdf-canvas-${doc.id}`), doc.fileData, { isThumbnail: true }), 0);
             } else {
+                // Icona generica anche per i file Office nella griglia
                 previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
             }
 
@@ -1235,39 +1272,73 @@
             });
         }
         
-        const renderPreviewContent = (fileData, fileType, fileName) => {
-            previewContent.innerHTML = '';
-            if (fileType.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = fileData;
-                img.className = 'max-w-full max-h-full object-contain';
-                previewContent.appendChild(img);
-            } else if (fileType === 'application/pdf') {
-                const canvas = document.createElement('canvas');
-                canvas.className = 'max-w-full max-h-full object-contain bg-white rounded-md shadow-lg';
-                previewContent.appendChild(canvas);
-                renderPdfToCanvas(canvas, fileData, { isModal: true });
-            } else {
+        // --- MODIFICATO: Funzione di rendering anteprima ---
+        const renderPreviewContent = async (fileData, fileType, fileName) => {
+            previewContent.innerHTML = `<div class="text-white"><div class="ocr-loader mx-auto"></div><p class="mt-2">Caricamento anteprima...</p></div>`;
+
+            try {
+                if (fileType.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = fileData;
+                    img.className = 'max-w-full max-h-full object-contain';
+                    previewContent.innerHTML = '';
+                    previewContent.appendChild(img);
+                } else if (fileType === 'application/pdf') {
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'max-w-full max-h-full object-contain bg-white rounded-md shadow-lg';
+                    previewContent.innerHTML = '';
+                    previewContent.appendChild(canvas);
+                    await renderPdfToCanvas(canvas, fileData, { isModal: true });
+                } else if (fileType.endsWith('.document') || fileName.endsWith('.docx')) { // Word
+                    const docContainer = document.createElement('div');
+                    docContainer.className = "bg-white p-8 rounded-md w-full h-full overflow-y-auto text-black";
+                    previewContent.innerHTML = '';
+                    previewContent.appendChild(docContainer);
+                    const fileBlob = dataURLtoBlob(fileData);
+                    await window.docx.renderAsync(fileBlob, docContainer);
+                } else if (fileType.endsWith('.sheet') || fileName.endsWith('.xlsx')) { // Excel
+                    const excelContainer = document.createElement('div');
+                    excelContainer.className = 'excel-preview-container';
+                    previewContent.innerHTML = '';
+                    previewContent.appendChild(excelContainer);
+
+                    const arrayBuffer = await dataURLtoBlob(fileData).arrayBuffer();
+                    const data = new Uint8Array(arrayBuffer);
+                    const workbook = XLSX.read(data, {type:"array"});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const html = XLSX.utils.sheet_to_html(worksheet);
+                    excelContainer.innerHTML = html;
+                } else {
+                    throw new Error("Anteprima non disponibile");
+                }
+            } catch (error) {
+                console.error("Errore durante la generazione dell'anteprima:", error);
                 previewContent.innerHTML = `
                     <div class="text-center text-white p-8">
-                        <i data-lucide="file-text" class="mx-auto h-32 w-32"></i>
+                        <i data-lucide="file-warning" class="mx-auto h-32 w-32 text-yellow-400"></i>
                         <p class="mt-4">Anteprima non disponibile per ${fileName}</p>
+                        <p class="text-xs text-gray-400 mt-1">${error.message}</p>
                     </div>`;
                 lucide.createIcons();
             }
-        }
-        
+        };
+
         function showPreviewModal(docId, attachmentIndex = -1) {
             Crud.get(docId, doc => {
                 if(!doc) return;
                 currentPreviewDoc = doc;
                 previewTitle.textContent = doc.displayName;
-                let fileToShow = { data: doc.fileData, type: doc.fileType, name: doc.fileName };
+                let fileToShow;
                 if (attachmentIndex > -1 && doc.attachments?.[attachmentIndex]) {
                     const att = doc.attachments[attachmentIndex];
                     fileToShow = { data: att.fileData, type: att.fileType, name: att.fileName };
+                } else {
+                    fileToShow = { data: doc.fileData, type: doc.fileType, name: doc.fileName };
                 }
+                
                 renderPreviewContent(fileToShow.data, fileToShow.type, fileToShow.name);
+
                 previewAttachmentsBar.innerHTML = '';
                 if (doc.attachments && doc.attachments.length > 0) {
                     let attachmentsHTML = `<button class="attachment-preview-btn inline-block p-2 rounded-md hover:bg-gray-600 ${attachmentIndex === -1 ? 'bg-blue-600' : ''}" data-index="-1">${doc.fileName} (Principale)</button>`;
@@ -1565,13 +1636,26 @@
         closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
         
         printBtn.addEventListener('click', () => {
-            const contentEl = previewContent.querySelector('canvas, img');
+            const contentEl = previewContent.querySelector('canvas, img, div.docx-wrapper, div.excel-preview-container');
             if (contentEl) {
-                const dataUrl = contentEl.tagName === 'CANVAS' ? contentEl.toDataURL('image/png') : contentEl.src;
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`<html><body style="text-align:center;"><img src="${dataUrl}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
-                printWindow.document.close();
-                printWindow.focus();
+                if(contentEl.matches('canvas, img')) {
+                    const dataUrl = contentEl.tagName === 'CANVAS' ? contentEl.toDataURL('image/png') : contentEl.src;
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`<html><body style="text-align:center;"><img src="${dataUrl}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
+                    printWindow.document.close();
+                    printWindow.focus();
+                } else {
+                     const printWindow = window.open('', '_blank');
+                     printWindow.document.write('<html><head><title>Stampa Documento</title>');
+                     // Aggiungi stili per la stampa se necessario
+                     printWindow.document.write('</head><body>');
+                     printWindow.document.write(contentEl.innerHTML);
+                     printWindow.document.write('</body></html>');
+                     printWindow.document.close();
+                     printWindow.focus();
+                     printWindow.print();
+                     printWindow.close();
+                }
             } else {
                  showSnackbar("Stampa non disponibile per questo file.", true);
             }
@@ -1764,7 +1848,8 @@
     }
 
     window.addEventListener('load', () => {
-        const requiredLibs = ['pdfjsLib', 'Tesseract', 'JSZip', 'lucide'];
+        // Aggiungiamo le nuove librerie al controllo
+        const requiredLibs = ['pdfjsLib', 'Tesseract', 'JSZip', 'lucide', 'docx', 'XLSX'];
         const maxRetries = 20;
         let retries = 0;
         const checkInterval = setInterval(() => {
@@ -1842,7 +1927,7 @@
         });
 
         const swCode = `
-            const CACHE_NAME = 'doc-manager-cache-v3';
+            const CACHE_NAME = 'doc-manager-cache-v4'; // Versione cache incrementata
             const URLS_TO_CACHE = [
                 './',
                 'https://cdn.tailwindcss.com',
@@ -1851,7 +1936,10 @@
                 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-                'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+                'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+                // Aggiunta delle nuove librerie alla cache
+                'https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
             ];
 
             self.addEventListener('install', event => {
@@ -1902,4 +1990,3 @@
     </script>
 </body>
 </html>
-
