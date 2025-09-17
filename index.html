@@ -610,6 +610,10 @@
 
         // --- Logica UI e Helper ---
         const dataURLtoBlob = (dataurl) => {
+            if (!dataurl || !dataurl.includes(',')) {
+                console.error("Invalid dataURL passed to dataURLtoBlob");
+                return null;
+            }
             const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
                   bstr = atob(arr[1]);
             let n = bstr.length;
@@ -1288,19 +1292,41 @@
                 el = document.createElement('img');
                 el.src = fileData;
                 el.className = 'max-w-full max-h-full object-contain';
+                previewContent.appendChild(el);
             } else if (fileType === 'application/pdf') {
-                el = document.createElement('iframe');
                 const blob = dataURLtoBlob(fileData);
+                if (!blob) {
+                    previewContent.innerHTML = `<div class="text-center text-white p-8"><i data-lucide="alert-triangle" class="mx-auto h-32 w-32 text-yellow-400"></i><p class="mt-4">Errore nel caricare il file per l'anteprima.</p></div>`;
+                    lucide.createIcons();
+                    return;
+                }
                 const objectUrl = URL.createObjectURL(blob);
+                el = document.createElement('iframe');
                 el.src = objectUrl;
                 el.className = 'w-full h-full border-none';
+                
+                // Pulisce l'URL dell'oggetto per evitare memory leak quando la modale si chiude
+                const observer = new MutationObserver((mutationsList, obs) => {
+                    for(const mutation of mutationsList) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            if (previewModal.classList.contains('hidden')) {
+                                URL.revokeObjectURL(objectUrl);
+                                obs.disconnect(); // Smette di osservare una volta eseguito
+                                return;
+                            }
+                        }
+                    }
+                });
+                observer.observe(previewModal, { attributes: true });
+
+                previewContent.appendChild(el);
             } else {
                 el = document.createElement('div');
                 el.className = 'text-center text-white p-8';
                 el.innerHTML = `<i data-lucide="file-text" class="mx-auto h-32 w-32"></i><p class="mt-4">Anteprima non disponibile per ${fileName}</p>`;
+                previewContent.appendChild(el);
+                lucide.createIcons();
             }
-            previewContent.appendChild(el);
-            lucide.createIcons();
         }
 
         function showPreviewModal(docId, attachmentIndex = -1) {
@@ -1649,6 +1675,30 @@
         // --- Fine Event Listener Tag ---
 
         closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
+        
+        printBtn.addEventListener('click', () => {
+            const previewIframe = previewContent.querySelector('iframe');
+            const previewImage = previewContent.querySelector('img');
+
+            if (previewIframe) { // PDF
+                try {
+                    previewIframe.contentWindow.print();
+                } catch(e) {
+                    showSnackbar("Impossibile stampare. Prova a scaricare il file e stamparlo.", true);
+                    console.error("Print error:", e);
+                }
+            } else if (previewImage) { // Immagine
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<html><head><title>Stampa Documento</title></head><body style="text-align:center;">');
+                printWindow.document.write('<img src="' + previewImage.src + '" style="max-width:100%;" onload="window.print();window.close();">');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+            } else {
+                 showSnackbar("Funzione di stampa non disponibile per questo tipo di file.", true);
+            }
+        });
+
         editPreviewBtn.addEventListener('click', () => {
             if (currentPreviewDoc) {
                 closeModal(previewModal);
@@ -1980,3 +2030,4 @@
     </script>
 </body>
 </html>
+
