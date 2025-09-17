@@ -14,7 +14,7 @@
       }
     </script>
     
-    <!-- Icone Lucide (URL aggiornato a un CDN più stabile e con versione specifica) -->
+    <!-- Icone Lucide -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js"></script>
 
     <!-- Libreria JSZip per gestire file .zip -->
@@ -23,7 +23,7 @@
     <!-- Libreria Tesseract.js per OCR client-side -->
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
 
-    <!-- Libreria PDF.js per anteprime PDF (versione aggiornata) -->
+    <!-- Libreria PDF.js per anteprime PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <!-- Font Inter da Google Fonts -->
@@ -35,10 +35,11 @@
     <meta name="theme-color" content="#317EFB"/>
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/317EFB/ffffff?text=Docs">
     
-    <!-- Manifest della PWA incorporato direttamente -->
+    <!-- Manifest della PWA incorporato direttamente (con migliorie) -->
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Gestore Documenti PWA",
         "short_name": "GestoreDoc",
+        "id": "./?v=1",
         "start_url": ".",
         "display": "standalone",
         "orientation": "portrait",
@@ -46,8 +47,8 @@
         "theme_color": "#317EFB",
         "description": "Un semplice gestore di documenti PWA per organizzarli e ricercarli.",
         "icons": [
-            { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192" },
-            { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512" }
+            { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+            { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
         ]
     }'>
 
@@ -70,7 +71,6 @@
         html.dark ::-webkit-scrollbar-thumb { background: #555; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
         html.dark ::-webkit-scrollbar-thumb:hover { background: #444; }
-        /* Stili per animazione di caricamento OCR */
         .ocr-loader {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #3498db;
@@ -83,40 +83,30 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Stili per evidenziare i campi suggeriti */
         .highlight-suggestion {
             animation: pulse-bg 2s infinite;
         }
         @keyframes pulse-bg {
             0% { background-color: inherit; }
-            50% { background-color: rgba(59, 130, 246, 0.1); } /* Light blue background */
+            50% { background-color: rgba(59, 130, 246, 0.1); }
             100% { background-color: inherit; }
         }
-
-        /* Stili per la scritta "Powered By" */
         .powered-by {
             position: fixed;
             top: 4px;
             left: 50%;
-            font-size: 0.65rem; /* Carattere piccolo (circa 10px) */
+            font-size: 0.65rem;
             font-weight: 500;
             z-index: 50;
-            pointer-events: none; /* Non intercetta i click del mouse */
+            pointer-events: none;
             animation: color-cycle 18s linear infinite, pulse-light 4s ease-in-out infinite;
-            text-shadow: 0 0 3px rgba(0,0,0,0.4); /* Leggera ombra per leggibilità */
+            text-shadow: 0 0 3px rgba(0,0,0,0.4);
             background: transparent;
         }
-
         @keyframes color-cycle {
-            0%   { color: #ff8a80; } /* Rosso chiaro */
-            16%  { color: #ffcf7d; } /* Arancione */
-            33%  { color: #b9f6ca; } /* Verde chiaro */
-            50%  { color: #84ffff; } /* Ciano */
-            67%  { color: #8c9eff; } /* Blu Indaco */
-            83%  { color: #f8bbd0; } /* Rosa */
-            100% { color: #ff8a80; } /* Ritorno al rosso */
+            0%   { color: #ff8a80; } 16%  { color: #ffcf7d; } 33%  { color: #b9f6ca; } 50%  { color: #84ffff; }
+            67%  { color: #8c9eff; } 83%  { color: #f8bbd0; } 100% { color: #ff8a80; }
         }
-
         @keyframes pulse-light {
             0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
             50%      { transform: translateX(-50%) scale(1.05); opacity: 1; }
@@ -136,7 +126,6 @@
                 </button>
             </div>
             
-            <!-- Statistiche Rapide -->
             <div class="mb-4 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-sm space-y-2">
                 <h3 class="font-semibold text-gray-800 dark:text-gray-200">Statistiche Archivio</h3>
                 <div class="flex justify-between items-center">
@@ -174,9 +163,7 @@
 
     <!-- Contenuto Principale -->
     <div class="container mx-auto max-w-6xl h-screen flex flex-col">
-        <!-- Sezione Fissa Superiore -->
         <div class="flex-shrink-0 bg-gray-100 dark:bg-gray-900 z-10 sticky top-0 pt-4 px-4">
-            <!-- Intestazione -->
             <header class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-4">
                     <button id="menu-btn" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -195,7 +182,6 @@
                 </div>
             </header>
 
-            <!-- Barra di ricerca e ordinamento -->
             <div class="mb-6 flex flex-col sm:flex-row gap-4">
                 <div class="relative flex-grow">
                     <input type="search" id="search-input" placeholder="Cerca in nome, tag, dettagli..." class="w-full p-3 pl-10 text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none dark:placeholder-gray-400">
@@ -218,7 +204,6 @@
                         <option value="50">50 per pagina</option>
                         <option value="99999">Mostra tutti</option>
                     </select>
-                    <!-- Selettore Vista -->
                      <div class="flex rounded-lg shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                         <button id="view-list-btn" class="p-3 text-blue-500 bg-blue-50 dark:bg-gray-700 rounded-l-md" title="Vista a Lista">
                             <i data-lucide="list" class="w-5 h-5"></i>
@@ -231,12 +216,8 @@
             </div>
         </div>
         
-        <!-- Contenuto Scorrevole -->
         <div id="scrollable-content" class="flex-grow overflow-y-auto pb-24 px-4">
-            <!-- Lista dei documenti -->
-            <main id="document-list-container">
-                <!-- Le card dei documenti verranno inserite qui -->
-            </main>
+            <main id="document-list-container"></main>
             
             <div id="pagination-container" class="text-center py-8">
                 <button id="load-more-btn" class="hidden bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 font-bold py-2 px-5 rounded-lg">Carica altri</button>
@@ -250,12 +231,10 @@
         </div>
     </div>
 
-    <!-- Pulsante Flottante -->
     <button id="add-doc-btn" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 z-20">
         <i data-lucide="plus" class="w-6 h-6"></i>
     </button>
     
-    <!-- Modale Aggiungi/Modifica Documento -->
     <div id="doc-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-40">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h2 id="modal-title" class="text-2xl font-bold mb-4">Aggiungi Documento</h2>
@@ -291,19 +270,15 @@
                 </div>
                 <div class="mb-4"><label for="doc-subcategory" class="block text-sm font-medium mb-1">Sottocategoria</label><input list="subcategory-suggestions" type="text" id="doc-subcategory" placeholder="Es. Gas" required class="mt-1 block w-full p-2 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:placeholder-gray-400"></div>
                 
-                <!-- NUOVO Sistema di Tag -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-1">Tag</label>
                     <div id="selected-tags-container" class="flex flex-wrap gap-2 items-center p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 min-h-[42px] cursor-text">
-                        <!-- I tag selezionati verranno inseriti qui -->
                         <input type="text" id="doc-tags-input" placeholder="Aggiungi tag..." class="flex-grow bg-transparent outline-none border-none p-0 text-sm">
                     </div>
-                    <input type="hidden" id="doc-tags" name="doc-tags"> <!-- The actual value holder -->
+                    <input type="hidden" id="doc-tags" name="doc-tags">
                     <div id="available-tags-section" class="mt-2 hidden">
                         <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tag suggeriti per questa categoria:</label>
-                        <div id="available-tags-container" class="flex flex-wrap gap-1 text-xs">
-                            <!-- I tag disponibili verranno inseriti qui -->
-                        </div>
+                        <div id="available-tags-container" class="flex flex-wrap gap-1 text-xs"></div>
                     </div>
                 </div>
 
@@ -315,11 +290,10 @@
             </form>
             <datalist id="category-suggestions"></datalist>
             <datalist id="subcategory-suggestions"></datalist>
-            <datalist id="tags-suggestions"></datalist> <!-- Mantenuto per compatibilità -->
+            <datalist id="tags-suggestions"></datalist>
         </div>
     </div>
 
-    <!-- Modale Anteprima File -->
     <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex flex-col p-4 z-50">
         <div class="flex-shrink-0 flex justify-between items-center text-white mb-4">
             <h2 id="preview-title" class="text-xl font-bold">Anteprima</h2>
@@ -335,7 +309,6 @@
         <div id="preview-attachments-bar" class="flex-shrink-0 bg-black bg-opacity-50 p-2 text-white text-center overflow-x-auto whitespace-nowrap hidden"></div>
     </div>
 
-    <!-- Modale Conferma Eliminazione -->
     <div id="confirm-delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm p-6">
             <h2 class="text-lg font-bold mb-2">Conferma Eliminazione</h2>
@@ -347,10 +320,8 @@
         </div>
     </div>
     
-    <!-- Snackbar -->
     <div id="snackbar" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 z-50"></div>
 
-    <!-- Modale Errore Caricamento Librerie -->
     <div id="load-error-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex flex-col items-center justify-center p-4 z-50 text-white text-center">
         <i data-lucide="server-crash" class="w-24 h-24 text-red-400 mb-4"></i>
         <h2 class="text-2xl font-bold mb-2">Errore Critico</h2>
@@ -362,16 +333,15 @@
     <script>
     // --- Funzione principale dell'applicazione ---
     function initializeApp() {
-        console.log("VERSIONE POTENZIATA E CORRETTA CARICATA - Avvio dell'app.");
+        console.log("App inizializzata.");
         
         // --- Inizializzazione PDF.js Worker ---
         if (window.pdfjsLib) {
             window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
         } else {
-            console.warn("Attenzione: libreria PDF.js non caricata. Le funzionalità PDF e OCR non saranno disponibili.");
+            console.warn("Attenzione: libreria PDF.js non caricata.");
         }
         
-        // --- Variabili Globali ---
         const docListContainer = document.getElementById('document-list-container');
         const emptyStateEl = document.getElementById('empty-state');
         const searchInput = document.getElementById('search-input');
@@ -385,12 +355,10 @@
         let attachmentsToAdd = [];
         let currentPreviewDoc = null;
         let currentView = localStorage.getItem('doc-view') || 'list';
-        // Variabili per la paginazione
         let fullFilteredDocs = [];
         let currentPage = 1;
         let itemsPerPage = 10;
 
-        // --- Elementi del DOM ---
         const docModal = document.getElementById('doc-modal');
         const docForm = document.getElementById('doc-form');
         const modalTitle = document.getElementById('modal-title');
@@ -442,7 +410,6 @@
             docForm['doc-details']
         ];
         
-        // Elementi per il nuovo sistema di Tag
         const selectedTagsContainer = document.getElementById('selected-tags-container');
         const docTagsInput = document.getElementById('doc-tags-input');
         const availableTagsSection = document.getElementById('available-tags-section');
@@ -455,7 +422,6 @@
         let categoryScopedTags = new Set();
 
 
-        // --- Funzione Helper per PDF.js ---
         function getPdfjsLib() {
             if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
                 return window.pdfjsLib;
@@ -466,7 +432,6 @@
             }
         }
 
-        // --- Database IndexedDB ---
         function initDB() {
             const request = indexedDB.open("DocumentManagerDB_v3", 2);
             request.onerror = e => console.error("DB Error:", e.target.errorCode);
@@ -490,8 +455,6 @@
             };
         }
 
-
-        // Funzione unica per aggiornare la UI
         function renderAll() {
             renderDocuments();
             renderFilterTree();
@@ -499,7 +462,6 @@
             renderStats();
         }
         
-        // --- Funzioni CRUD ---
         const Crud = {
             save: (doc, showNotification = true) => {
                 return new Promise((resolve, reject) => {
@@ -543,7 +505,6 @@
             }
         };
         
-        // --- Funzioni di Logica OCR Avanzata ---
         function calculateSimilarity(s1, s2) {
             let longer = s1;
             let shorter = s2;
@@ -594,26 +555,17 @@
             return bestScore;
         }
 
-        // --- NUOVA FUNZIONE HELPER per determinare il tipo MIME dal nome file ---
         function getMimeTypeFromName(fileName) {
             if (!fileName || !fileName.includes('.')) return 'application/octet-stream';
             const extension = fileName.split('.').pop().toLowerCase();
             switch (extension) {
-                case 'jpg':
-                case 'jpeg':
-                    return 'image/jpeg';
-                case 'png':
-                    return 'image/png';
-                case 'gif':
-                    return 'image/gif';
-                case 'webp':
-                    return 'image/webp';
-                case 'svg':
-                    return 'image/svg+xml';
-                case 'pdf':
-                    return 'application/pdf';
-                default:
-                    return 'application/octet-stream';
+                case 'jpg': case 'jpeg': return 'image/jpeg';
+                case 'png': return 'image/png';
+                case 'gif': return 'image/gif';
+                case 'webp': return 'image/webp';
+                case 'svg': return 'image/svg+xml';
+                case 'pdf': return 'application/pdf';
+                default: return 'application/octet-stream';
             }
         }
 
@@ -631,7 +583,6 @@
             });
         }
 
-        // --- Logica UI e Helper ---
         const dataURLtoBlob = (dataurl) => {
             if (!dataurl || !dataurl.includes(',')) {
                 console.error("Invalid dataURL passed to dataURLtoBlob");
@@ -708,14 +659,12 @@
 
         function parseFilenameForMetadata(filename) {
             if (!filename) return;
-
             const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.')) || filename;
             const nameInput = docForm['doc-name'];
             if (!nameInput.value) {
                 nameInput.value = nameWithoutExt.replace(/[-_]/g, ' ');
                 highlightField(nameInput);
             }
-
             const yearInput = docForm['doc-year'];
             if (!yearInput.value) {
                 const yearMatch = nameWithoutExt.match(/\b(19|20)\d{2}\b/);
@@ -724,7 +673,6 @@
                     highlightField(yearInput);
                 }
             }
-
             const categoryInput = docForm['doc-category'];
             const subcategoryInput = docForm['doc-subcategory'];
             if (!categoryInput.value) {
@@ -752,7 +700,6 @@
             
             const worker = await Tesseract.createWorker('ita', 1, {
                 logger: m => {
-                    console.log(m);
                     if (m.status === 'recognizing text') {
                         const progress = (m.progress * 100).toFixed(0);
                         ocrStatusEl.innerHTML = `<div class="ocr-loader"></div> <span>Analisi in corso (${progress}%)...</span>`;
@@ -836,14 +783,12 @@
                 }
             };
 
-            // 1. PREPARAZIONE DATI
             const { existingCategories, existingSubcategories } = await getExistingCategoriesAndSubcategories();
             const sortedCategories = [...existingCategories].sort((a, b) => b.length - a.length);
             const sortedSubcategories = [...existingSubcategories].sort((a, b) => b.length - a.length);
             const ocrWords = text.toLowerCase().replace(/[.,/#!$%\^&*;:{}=\-_`~()]/g, "").split(/\s+/).filter(Boolean);
             const WORD_SIMILARITY_THRESHOLD = 0.8; 
 
-            // 2. LOGICA DI CORRISPONDENZA BASATA SULLA SPECIFICITÀ
             if (!docForm['doc-category'].value) {
                 for (const category of sortedCategories) {
                     const catWords = category.toLowerCase().split(' ');
@@ -880,7 +825,6 @@
                 }
             }
             
-            // 3. FALLBACK: Usa i riconoscitori a parola chiave
             if (!docForm['doc-category'].value) {
                 const recognizers = [
                     { name: 'Luce', keywords: /enel|servizio elettrico|e-distribuzione|a2a energia/i, cat: 'Bollette', sub: 'Luce' },
@@ -903,11 +847,8 @@
                 }
             }
 
-            // 4. ESTRAZIONE DATI GENERICI
             const oggettoMatch = text.match(/(?:^|\n)\s*oggetto:?\s*(.*)/i);
-            if (oggettoMatch && oggettoMatch[1]) {
-                appendToDetails('Oggetto', oggettoMatch[1].trim());
-            }
+            if (oggettoMatch && oggettoMatch[1]) appendToDetails('Oggetto', oggettoMatch[1].trim());
 
             const yearMatch = text.match(/\b(20\d{2})\b/);
             if (yearMatch) setField(docForm['doc-year'], yearMatch[0]);
@@ -952,18 +893,8 @@
             }
         }
         
-        // --- START: MODIFIED PDF RENDERING LOGIC ---
-        /**
-         * Renders the first page of a PDF file onto a given canvas element.
-         * @param {HTMLCanvasElement} canvas The canvas to render on.
-         * @param {string} fileData The base64 data URL of the PDF file.
-         * @param {object} [options={}] Optional settings for rendering.
-         * @param {boolean} [options.isThumbnail=false] - If true, renders a small thumbnail.
-         * @param {boolean} [options.isModal=false] - If true, scales to fit the container for modal preview.
-         */
         async function renderPdfToCanvas(canvas, fileData, options = {}) {
             if (!canvas || !fileData) return;
-
             try {
                 const pdfjsLib = getPdfjsLib();
                 if (!pdfjsLib) throw new Error("PDF.js library not found");
@@ -976,28 +907,23 @@
                 const viewport = page.getViewport({ scale: scale });
                 
                 if (options.isThumbnail) {
-                    const desiredHeight = 128; // Standard thumbnail height
-                    scale = desiredHeight / viewport.height;
+                    scale = 128 / viewport.height;
                 } else if (options.isModal) {
-                    // Scale to fit parent container in modal, respecting aspect ratio
                     const container = canvas.parentElement;
                     if (container) {
                          const maxWidth = container.clientWidth;
                          const maxHeight = container.clientHeight;
                          scale = Math.min(maxWidth / viewport.width, maxHeight / viewport.height);
                     }
-                } else { // Form preview
-                    const desiredWidth = canvas.parentElement.clientWidth - 20; // Fit inside the preview box padding
-                    scale = desiredWidth / viewport.width;
+                } else {
+                    scale = (canvas.parentElement.clientWidth - 20) / viewport.width;
                 }
 
                 const scaledViewport = page.getViewport({ scale: scale });
                 const context = canvas.getContext('2d');
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
-
                 await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
-
             } catch (error) {
                 console.error(`Error rendering PDF preview:`, error);
                 const container = canvas.parentElement;
@@ -1013,23 +939,18 @@
             const previewContainer = document.getElementById('file-preview-container');
             const previewEl = document.getElementById('file-preview');
             ocrBtn.disabled = !file || (!file.type.startsWith('image/') && file.type !== 'application/pdf');
-
-            if (file) {
-                 parseFilenameForMetadata(file.name);
-            }
+            if (file) parseFilenameForMetadata(file.name);
             previewContainer.classList.add('hidden');
             previewEl.innerHTML = '';
             if (!file) return;
             previewContainer.classList.remove('hidden');
             const reader = new FileReader();
-            
             reader.onload = e => {
                 if (file.type.startsWith('image/')) {
                     previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
                 } else if (file.type === 'application/pdf') {
                     previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
-                    const canvas = previewEl.querySelector('canvas');
-                    renderPdfToCanvas(canvas, e.target.result);
+                    renderPdfToCanvas(previewEl.querySelector('canvas'), e.target.result);
                 } else {
                     previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
                     lucide.createIcons();
@@ -1037,12 +958,9 @@
             };
             reader.readAsDataURL(file);
         }
-        // --- END: MODIFIED PDF RENDERING LOGIC ---
-
+        
         function renderDocuments() {
-            // This function now only gets, filters, and sorts the data.
             currentPage = 1;
-            
             Crud.getAll(docs => {
                 const searchTerm = searchInput.value.toLowerCase();
                 
@@ -1071,17 +989,13 @@
                         case 'date_desc': default: return b.uploadDate - a.uploadDate;
                     }
                 });
-
-                fullFilteredDocs = filteredDocs; // Store the full filtered list
-                displayCurrentPage(); // Display the first page of results
+                fullFilteredDocs = filteredDocs;
+                displayCurrentPage();
             });
         }
         
         function displayCurrentPage(append = false) {
-            if (!append) {
-                docListContainer.innerHTML = '';
-            }
-
+            if (!append) docListContainer.innerHTML = '';
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
             const docsToRender = fullFilteredDocs.slice(start, end);
@@ -1240,23 +1154,18 @@
             });
         }
 
-        // --- NUOVE FUNZIONI PER GESTIONE TAG ---
         function updateTagsUI() {
             if (!selectedTagsContainer) return;
-
             docTagsHiddenInput.value = [...currentTagsSet].join(', ');
-
             while (selectedTagsContainer.firstChild && selectedTagsContainer.firstChild !== docTagsInput) {
                 selectedTagsContainer.removeChild(selectedTagsContainer.firstChild);
             }
-            
             currentTagsSet.forEach(tag => {
                 const tagEl = document.createElement('span');
                 tagEl.className = 'flex items-center gap-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium pl-2.5 pr-1 py-0.5 rounded-full';
                 tagEl.innerHTML = `${tag}<button type="button" class="remove-tag-btn rounded-full hover:bg-blue-200 dark:hover:bg-blue-700 p-0.5" data-tag="${tag}"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 selectedTagsContainer.insertBefore(tagEl, docTagsInput);
             });
-
             availableTagsContainer.innerHTML = '';
             if (categoryScopedTags.size > 0) {
                 const availableTags = [...categoryScopedTags].filter(t => !currentTagsSet.has(t)).sort();
@@ -1276,7 +1185,6 @@
             } else {
                 availableTagsSection.classList.add('hidden');
             }
-
             lucide.createIcons();
         }
         
@@ -1306,9 +1214,7 @@
                 updateTagsUI();
             }
         }
-        // --- FINE NUOVE FUNZIONI TAG ---
-
-
+        
         function renderStats() {
             Crud.getAll(docs => {
                 statsTotalDocs.textContent = docs.length;
@@ -1323,10 +1229,8 @@
             });
         }
         
-        // --- START: MODIFIED PREVIEW CONTENT LOGIC ---
         const renderPreviewContent = (fileData, fileType, fileName) => {
-            previewContent.innerHTML = ''; // Clear previous content
-            
+            previewContent.innerHTML = '';
             if (fileType.startsWith('image/')) {
                 const img = document.createElement('img');
                 img.src = fileData;
@@ -1346,8 +1250,7 @@
                 lucide.createIcons();
             }
         }
-        // --- END: MODIFIED PREVIEW CONTENT LOGIC ---
-
+        
         function showPreviewModal(docId, attachmentIndex = -1) {
             Crud.get(docId, doc => {
                 if(!doc) return;
@@ -1550,15 +1453,11 @@
                 if (file) {
                     fileHash = await calculateFileHash(file);
                     const existingDoc = await checkForDuplicate(fileHash);
-                    if (existingDoc) {
-                        if(editingDocId && existingDoc.id == editingDocId) {
-                           // Stesso file, si può procedere
-                        } else {
-                           showSnackbar(`Questo file esiste già: "${existingDoc.displayName}"`, true);
-                           saveButton.disabled = false;
-                           saveButton.innerHTML = originalButtonHTML;
-                           return;
-                        }
+                    if (existingDoc && (!editingDocId || existingDoc.id != editingDocId)) {
+                        showSnackbar(`Questo file esiste già: "${existingDoc.displayName}"`, true);
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = originalButtonHTML;
+                        return;
                     }
                 }
 
@@ -1577,11 +1476,7 @@
                         details: docForm['doc-details'].value,
                         uploadDate: editingDocId ? baseDoc.uploadDate : new Date().getTime(),
                     };
-
-                    if (fileHash) {
-                        docData.contentHash = fileHash;
-                    }
-
+                    if (fileHash) docData.contentHash = fileHash;
                     await Crud.save(docData);
                 };
 
@@ -1590,7 +1485,6 @@
                         Crud.get(editingDocId, async (doc) => {
                             try {
                                 if (!doc) return reject(new Error("Documento da modificare non trovato."));
-                                
                                 let docToProcess = { ...doc };
                                 if (file) {
                                     const { fileData, fileName, fileType } = await readFileAsDataURL(file);
@@ -1600,15 +1494,11 @@
                                 }
                                 await processSubmit(docToProcess);
                                 resolve();
-                            } catch (err) {
-                                reject(err);
-                            }
+                            } catch (err) { reject(err); }
                         });
                     });
                 } else {
-                    if (!file) {
-                        throw new Error("Seleziona un file principale.");
-                    }
+                    if (!file) throw new Error("Seleziona un file principale.");
                     const { fileData, fileName, fileType } = await readFileAsDataURL(file);
                     const newDoc = { fileData, fileName, fileType, attachments: [] };
                     await processSubmit(newDoc);
@@ -1616,7 +1506,7 @@
             } catch (error) {
                 console.error("Errore durante il salvataggio del documento:", error);
                 if (error.name !== 'ConstraintError') {
-                    showSnackbar(error.message || "Errore nel salvataggio. Controlla la console.", true);
+                    showSnackbar(error.message || "Errore nel salvataggio.", true);
                 }
             } finally {
                 saveButton.disabled = false;
@@ -1625,46 +1515,25 @@
         });
         
         docListContainer.addEventListener('click', (e) => {
-            const previewBtn = e.target.closest('.preview-btn');
-            const editBtn = e.target.closest('.edit-doc-btn');
-            const attachmentLink = e.target.closest('.attachment-link');
-            const tagLink = e.target.closest('.tag-link');
-            const deleteBtn = e.target.closest('.delete-doc-btn');
+            const target = e.target.closest('.preview-btn, .edit-doc-btn, .attachment-link, .tag-link, .delete-doc-btn');
+            if (!target) return;
+            e.preventDefault();
 
-            if (deleteBtn) {
-                e.preventDefault();
-                docIdToDelete = parseInt(deleteBtn.dataset.id);
+            if (target.matches('.delete-doc-btn')) {
+                docIdToDelete = parseInt(target.dataset.id);
                 openModal(confirmDeleteModal);
-                return;
-            }
-
-            if (tagLink) {
-                e.preventDefault();
-                activeTagFilter = tagLink.dataset.tag;
+            } else if (target.matches('.tag-link')) {
+                activeTagFilter = target.dataset.tag;
                 renderAll();
-                return;
-            }
-
-            if (attachmentLink) {
-                e.preventDefault();
-                showPreviewModal(attachmentLink.dataset.docId, parseInt(attachmentLink.dataset.attachmentIndex));
-                return;
-            }
-
-            if (editBtn) {
-                e.preventDefault();
-                openEditModal(editBtn.dataset.id);
-                return;
-            }
-
-            if (previewBtn) {
-                e.preventDefault();
-                showPreviewModal(previewBtn.dataset.id);
-                return;
+            } else if (target.matches('.attachment-link')) {
+                showPreviewModal(target.dataset.docId, parseInt(target.dataset.attachmentIndex));
+            } else if (target.matches('.edit-doc-btn')) {
+                openEditModal(target.dataset.id);
+            } else if (target.matches('.preview-btn')) {
+                showPreviewModal(target.dataset.id);
             }
         });
 
-        // --- Event Listener per il nuovo sistema di Tag ---
         docTagsInput.addEventListener('keydown', e => {
             if (e.key === ',' || e.key === 'Enter') {
                 e.preventDefault();
@@ -1672,7 +1541,6 @@
                 docTagsInput.value = '';
             }
         });
-
         selectedTagsContainer.addEventListener('click', e => {
             const removeBtn = e.target.closest('.remove-tag-btn');
             if (removeBtn) {
@@ -1682,33 +1550,24 @@
                 docTagsInput.focus();
             }
         });
-
         availableTagsContainer.addEventListener('click', e => {
             const addBtn = e.target.closest('.add-tag-btn');
-            if (addBtn) {
-                addTag(addBtn.dataset.tag);
-            }
+            if (addBtn) addTag(addBtn.dataset.tag);
         });
-        
         categoryInput.addEventListener('input', (e) => updateCategoryScopedTags(e.target.value));
-        // --- Fine Event Listener Tag ---
 
         closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
         
         printBtn.addEventListener('click', () => {
-            const previewCanvas = previewContent.querySelector('canvas');
-            const previewImage = previewContent.querySelector('img');
-
-            if (previewCanvas || previewImage) { // PDF (rendered on canvas) or Image
-                const dataUrl = previewCanvas ? previewCanvas.toDataURL('image/png') : previewImage.src;
+            const contentEl = previewContent.querySelector('canvas, img');
+            if (contentEl) {
+                const dataUrl = contentEl.tagName === 'CANVAS' ? contentEl.toDataURL('image/png') : contentEl.src;
                 const printWindow = window.open('', '_blank');
-                printWindow.document.write('<html><head><title>Stampa Documento</title></head><body style="text-align:center;">');
-                printWindow.document.write('<img src="' + dataUrl + '" style="max-width:100%;" onload="window.print();window.close();">');
-                printWindow.document.write('</body></html>');
+                printWindow.document.write(`<html><body style="text-align:center;"><img src="${dataUrl}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
                 printWindow.document.close();
                 printWindow.focus();
             } else {
-                 showSnackbar("Funzione di stampa non disponibile per questo tipo di file.", true);
+                 showSnackbar("Stampa non disponibile per questo file.", true);
             }
         });
 
@@ -1728,13 +1587,9 @@
             if(currentPreviewDoc){
                 const a = document.createElement('a');
                 const currentAttachmentIndex = parseInt(previewAttachmentsBar.querySelector('.bg-blue-600')?.dataset.index ?? -1);
-                let fileToDownload;
-                if (currentAttachmentIndex === -1) {
-                    fileToDownload = { data: currentPreviewDoc.fileData, name: currentPreviewDoc.fileName };
-                } else {
-                    const att = currentPreviewDoc.attachments[currentAttachmentIndex];
-                    fileToDownload = { data: att.fileData, name: att.fileName };
-                }
+                let fileToDownload = (currentAttachmentIndex === -1) 
+                    ? { data: currentPreviewDoc.fileData, name: currentPreviewDoc.fileName }
+                    : { data: currentPreviewDoc.attachments[currentAttachmentIndex].fileData, name: currentPreviewDoc.attachments[currentAttachmentIndex].fileName };
                 a.href = fileToDownload.data;
                 a.download = fileToDownload.name;
                 a.click();
@@ -1742,9 +1597,7 @@
         });
         previewAttachmentsBar.addEventListener('click', (e) => {
             const btn = e.target.closest('.attachment-preview-btn');
-            if (btn) {
-                showPreviewModal(currentPreviewDoc.id, parseInt(btn.dataset.index));
-            }
+            if (btn) showPreviewModal(currentPreviewDoc.id, parseInt(btn.dataset.index));
         });
         
         cancelDeleteBtn.addEventListener('click', () => {
@@ -1774,16 +1627,14 @@
                         delete docMetadata.fileData;
 
                         if (doc.attachments && doc.attachments.length > 0) {
-                            docMetadata.attachments = [];
-                            for (let i = 0; i < doc.attachments.length; i++) {
-                                const att = doc.attachments[i];
+                            docMetadata.attachments = doc.attachments.map((att, i) => {
                                 const attMetadata = { ...att };
                                 const attFileName = `${doc.id}-att-${i}-${att.fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
                                 attMetadata.filePath = `files/${attFileName}`;
                                 zip.file(attMetadata.filePath, dataURLtoBlob(att.fileData));
                                 delete attMetadata.fileData;
-                                docMetadata.attachments.push(attMetadata);
-                            }
+                                return attMetadata;
+                            });
                         }
                         metadata.push(docMetadata);
                     }
@@ -1812,55 +1663,39 @@
                 try {
                     const zip = await JSZip.loadAsync(e.target.result);
                     const metadataFile = zip.file("metadata.json");
-                    if (!metadataFile) {
-                        throw new Error("File metadata.json non trovato nel backup.");
-                    }
+                    if (!metadataFile) throw new Error("File metadata.json non trovato.");
                     const metadata = JSON.parse(await metadataFile.async("string"));
-
                     Crud.clear(async () => {
                         showSnackbar(`Importazione di ${metadata.length} documenti...`);
                         for (const docMeta of metadata) {
                              if (!zip.file(docMeta.filePath)) {
-                                console.warn(`File ${docMeta.filePath} non trovato nel backup per il documento "${docMeta.displayName}". Salto.`);
+                                console.warn(`File ${docMeta.filePath} mancante per "${docMeta.displayName}".`);
                                 continue;
                              }
                              const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
-                             const mainFileInfo = await readFileAsDataURL(mainFileBlob);
-                             docMeta.fileData = mainFileInfo.fileData;
-                             
-                             // FIX: Infer file type if missing
-                             docMeta.fileType = mainFileInfo.fileType || getMimeTypeFromName(docMeta.fileName);
-                             
+                             docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
+                             docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
                              delete docMeta.filePath;
                              
-                             if (docMeta.attachments && docMeta.attachments.length > 0) {
+                             if (docMeta.attachments) {
                                 for(let attMeta of docMeta.attachments) {
-                                    if (!zip.file(attMeta.filePath)) {
-                                       console.warn(`File allegato ${attMeta.filePath} non trovato. Salto.`);
-                                       continue;
-                                    }
+                                    if (!zip.file(attMeta.filePath)) continue;
                                     const attFileBlob = await zip.file(attMeta.filePath).async("blob");
-                                    const attFileInfo = await readFileAsDataURL(attFileBlob);
-                                    attMeta.fileData = attFileInfo.fileData;
-
-                                    // FIX: Infer file type for attachments if missing
-                                    attMeta.fileType = attFileInfo.fileType || getMimeTypeFromName(attMeta.fileName);
-                                    
+                                    attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
+                                    attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
                                     delete attMeta.filePath;
                                 }
                              }
                              delete docMeta.id;
                              const fileForHash = new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType });
                              docMeta.contentHash = await calculateFileHash(fileForHash);
-
-                             const tx = db.transaction("documents", "readwrite");
-                             tx.objectStore("documents").put(docMeta);
+                             db.transaction("documents", "readwrite").objectStore("documents").put(docMeta);
                         }
                         showSnackbar('Importazione completata!');
                         renderAll();
                     });
                 } catch (error) {
-                    showSnackbar("Errore: il file di backup non è valido o è corrotto.", true);
+                    showSnackbar("Errore: il file di backup non è valido.", true);
                     console.error("Import error:", error);
                 } finally {
                     importFileInput.value = ''; 
@@ -1889,7 +1724,6 @@
             field.addEventListener('focus', removeHighlight);
         });
 
-        // --- Inizializzazione ---
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(savedTheme);
         updateViewButtons(currentView);
@@ -1897,38 +1731,23 @@
         lucide.createIcons();
     }
 
-    // --- Loader robusto per le librerie esterne ---
     window.addEventListener('load', () => {
         const requiredLibs = ['pdfjsLib', 'Tesseract', 'JSZip', 'lucide'];
-        const maxRetries = 20; // Attende al massimo 10 secondi
+        const maxRetries = 20;
         let retries = 0;
-
-        console.log("Pagina caricata. Inizio controllo delle librerie esterne...");
-
         const checkInterval = setInterval(() => {
             const missingLibs = requiredLibs.filter(lib => typeof window[lib] === 'undefined' || window[lib] === null);
-
             if (missingLibs.length === 0) {
-                console.log("Tutte le librerie necessarie sono state caricate con successo.");
                 clearInterval(checkInterval);
                 initializeApp();
             } else {
                 retries++;
                 if (retries > maxRetries) {
                     clearInterval(checkInterval);
-                    const errorMessage = `Errore: Impossibile caricare le seguenti librerie: ${missingLibs.join(', ')}`;
-                    console.error(errorMessage);
-                    
-                    // Mostra la modale di errore critico invece della vecchia notifica
                     document.getElementById('missing-libs-list').textContent = `Dettagli: ${missingLibs.join(', ')} non trovate.`;
                     document.getElementById('load-error-modal').classList.remove('hidden');
-                    if (window.lucide) {
-                        lucide.createIcons(); 
-                    }
+                    if (window.lucide) lucide.createIcons();
                     document.getElementById('reload-page-btn').onclick = () => window.location.reload();
-
-                } else {
-                    console.log(`In attesa delle librerie: ${missingLibs.join(', ')} (Tentativo ${retries}/${maxRetries})`);
                 }
             }
         }, 500);
@@ -1936,30 +1755,27 @@
     </script>
     
     <!-- ================================================================= -->
-    <!-- NUOVA SEZIONE: Logica per Service Worker e Installazione PWA       -->
+    <!-- SEZIONE REVISIONATA: Logica per Service Worker e Installazione PWA -->
     <!-- ================================================================= -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
-        // --- LOGICA DI INSTALLAZIONE PWA (MIGLIORATA) ---
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
 
-        // Controlla se l'app è già in esecuzione in modalità standalone
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-             console.log("App in esecuzione in modalità standalone, nascondo il pulsante di installazione.");
-             if(installBtn) installBtn.classList.add('hidden');
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        if (isStandalone) {
+             console.log("App in esecuzione in modalità standalone, pulsante di installazione nascosto.");
+             if(installBtn) installBtn.style.display = 'none';
         } else {
-            console.log("App in esecuzione nel browser.");
+            console.log("App in esecuzione nel browser, pronto per l'installazione.");
         }
         
         window.addEventListener('beforeinstallprompt', (e) => {
+            if (isStandalone) return;
             console.log('Evento "beforeinstallprompt" intercettato.');
-            // Previene la visualizzazione del prompt di installazione nativo
             e.preventDefault();
-            // Salva l'evento per poterlo attivare in seguito
             deferredPrompt = e;
-            // Mostra il nostro pulsante di installazione personalizzato
             if (installBtn) {
                 console.log("Mostro il pulsante di installazione personalizzato.");
                 installBtn.classList.remove('hidden');
@@ -1967,37 +1783,31 @@
         });
 
         if (installBtn) {
-            installBtn.addEventListener('click', () => {
+            installBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
-                    console.log("L'utente ha cliccato sul pulsante di installazione.");
-                    // Nasconde il nostro pulsante
-                    installBtn.classList.add('hidden');
-                    // Mostra il prompt di installazione
+                    console.log("L'utente ha cliccato, mostro il prompt di installazione.");
                     deferredPrompt.prompt();
-                    // Aspetta la scelta dell'utente
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('L\'utente ha accettato l\'installazione');
-                        } else {
-                            console.log('L\'utente ha rifiutato l\'installazione');
-                        }
-                        deferredPrompt = null;
-                    });
-                } else {
-                    console.log("Nessun evento di installazione disponibile.");
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`L'utente ha scelto: ${outcome}`);
+                    deferredPrompt = null;
+                    installBtn.classList.add('hidden');
                 }
             });
         }
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA installata con successo!');
+            if (installBtn) installBtn.style.display = 'none';
+            deferredPrompt = null;
+            if(typeof showSnackbar === 'function') {
+                showSnackbar('Applicazione installata con successo!');
+            }
+        });
 
-        // --- CODICE DEL SERVICE WORKER ---
-        // Definiamo il codice del Service Worker come una stringa.
-        // Questo ci permette di includerlo nello stesso file HTML.
         const swCode = `
-            const CACHE_NAME = 'doc-manager-cache-v1';
-            // Lista delle risorse fondamentali da mettere in cache.
-            // Includiamo la pagina principale e tutte le librerie esterne.
+            const CACHE_NAME = 'doc-manager-cache-v2';
             const URLS_TO_CACHE = [
-                './', // La pagina index.html stessa
+                './',
                 'https://cdn.tailwindcss.com',
                 'https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js',
                 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
@@ -2007,7 +1817,6 @@
                 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
             ];
 
-            // Evento 'install': viene eseguito quando il Service Worker viene installato.
             self.addEventListener('install', event => {
                 console.log('Service Worker: Installazione...');
                 event.waitUntil(
@@ -2016,15 +1825,13 @@
                             console.log('Service Worker: Caching delle risorse...');
                             return cache.addAll(URLS_TO_CACHE);
                         })
-                        .then(() => self.skipWaiting()) // Forza l'attivazione immediata del nuovo SW
+                        .then(() => self.skipWaiting())
                 );
             });
 
-            // Evento 'activate': viene eseguito quando il Service Worker viene attivato.
             self.addEventListener('activate', event => {
                 console.log('Service Worker: Attivazione...');
                 event.waitUntil(
-                    // Rimuove le vecchie cache non più necessarie
                     caches.keys().then(cacheNames => {
                         return Promise.all(
                             cacheNames.map(cache => {
@@ -2034,45 +1841,33 @@
                                 }
                             })
                         );
-                    }).then(() => self.clients.claim()) // Prende il controllo immediato della pagina
+                    }).then(() => self.clients.claim())
                 );
             });
 
-            // Evento 'fetch': intercetta tutte le richieste di rete dalla pagina.
             self.addEventListener('fetch', event => {
-                // Strategia "Cache-First": prima controlla la cache, se non trova nulla va sulla rete.
                 event.respondWith(
                     caches.match(event.request)
                         .then(response => {
-                            // Se la risorsa è in cache, la restituisce.
-                            if (response) {
-                                return response;
-                            }
-                            // Altrimenti, esegue la richiesta di rete.
-                            return fetch(event.request);
+                            return response || fetch(event.request);
                         })
                 );
             });
         `;
 
-        // --- REGISTRAZIONE DEL SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
-            // Creiamo un "file virtuale" (Blob) dal nostro codice stringa.
-            const swBlob = new Blob([swCode], { type: 'application/javascript' });
-            // Creiamo un URL per questo file virtuale.
-            const swUrl = URL.createObjectURL(swBlob);
-
-            // Registriamo il Service Worker usando l'URL del file virtuale.
-            navigator.serviceWorker.register(swUrl, { scope: './' })
-                .then(registration => {
-                    console.log('Service Worker registrato con successo con scope:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('Registrazione del Service Worker fallita:', error);
-                });
+            try {
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl, { scope: './' })
+                    .then(registration => {
+                        console.log('Service Worker registrato con successo. Scope:', registration.scope);
+                    });
+            } catch (error) {
+                 console.error('Registrazione del Service Worker fallita:', error);
+            }
         }
     });
     </script>
 </body>
 </html>
-
