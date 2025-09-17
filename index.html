@@ -39,7 +39,7 @@
     <link rel="manifest" href='data:application/manifest+json,{
         "name": "Gestore Documenti PWA",
         "short_name": "GestoreDoc",
-        "id": "./?v=1",
+        "id": "/?v=1",
         "start_url": ".",
         "display": "standalone",
         "orientation": "portrait",
@@ -1754,9 +1754,9 @@
     });
     </script>
     
-    <!-- ================================================================= -->
-    <!-- SEZIONE REVISIONATA: Logica per Service Worker e Installazione PWA -->
-    <!-- ================================================================= -->
+    <!-- ===================================================================== -->
+    <!-- SEZIONE DEBUG: Logica per Service Worker e Installazione PWA        -->
+    <!-- ===================================================================== -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
@@ -1764,20 +1764,21 @@
         const installBtn = document.getElementById('installBtn');
 
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        
         if (isStandalone) {
-             console.log("App in esecuzione in modalità standalone, pulsante di installazione nascosto.");
+             console.log("PWA DEBUG: L'app è già in modalità standalone. Il pulsante di installazione non verrà mostrato.");
              if(installBtn) installBtn.style.display = 'none';
         } else {
-            console.log("App in esecuzione nel browser, pronto per l'installazione.");
+            console.log("PWA DEBUG: L'app è in esecuzione nel browser. In attesa dei criteri di installabilità.");
         }
         
         window.addEventListener('beforeinstallprompt', (e) => {
             if (isStandalone) return;
-            console.log('Evento "beforeinstallprompt" intercettato.');
+            console.log('PWA DEBUG: Evento "beforeinstallprompt" intercettato! L\'app è installabile.');
             e.preventDefault();
             deferredPrompt = e;
             if (installBtn) {
-                console.log("Mostro il pulsante di installazione personalizzato.");
+                console.log("PWA DEBUG: Mostro il pulsante di installazione personalizzato.");
                 installBtn.classList.remove('hidden');
             }
         });
@@ -1785,18 +1786,22 @@
         if (installBtn) {
             installBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
-                    console.log("L'utente ha cliccato, mostro il prompt di installazione.");
+                    console.log("PWA DEBUG: L'utente ha cliccato il pulsante. Mostro il prompt nativo.");
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`L'utente ha scelto: ${outcome}`);
+                    console.log(`PWA DEBUG: Scelta dell'utente: ${outcome}`);
+                    if (outcome === 'accepted') {
+                        installBtn.classList.add('hidden');
+                    }
                     deferredPrompt = null;
-                    installBtn.classList.add('hidden');
+                } else {
+                    console.log("PWA DEBUG: Il pulsante è stato cliccato, ma 'deferredPrompt' non è disponibile.");
                 }
             });
         }
         
         window.addEventListener('appinstalled', () => {
-            console.log('PWA installata con successo!');
+            console.log('PWA DEBUG: Evento "appinstalled" ricevuto. Installazione completata!');
             if (installBtn) installBtn.style.display = 'none';
             deferredPrompt = null;
             if(typeof showSnackbar === 'function') {
@@ -1805,7 +1810,7 @@
         });
 
         const swCode = `
-            const CACHE_NAME = 'doc-manager-cache-v2';
+            const CACHE_NAME = 'doc-manager-cache-v3';
             const URLS_TO_CACHE = [
                 './',
                 'https://cdn.tailwindcss.com',
@@ -1818,28 +1823,21 @@
             ];
 
             self.addEventListener('install', event => {
-                console.log('Service Worker: Installazione...');
+                console.log('SW: Installazione...');
                 event.waitUntil(
                     caches.open(CACHE_NAME)
-                        .then(cache => {
-                            console.log('Service Worker: Caching delle risorse...');
-                            return cache.addAll(URLS_TO_CACHE);
-                        })
+                        .then(cache => cache.addAll(URLS_TO_CACHE))
                         .then(() => self.skipWaiting())
                 );
             });
 
             self.addEventListener('activate', event => {
-                console.log('Service Worker: Attivazione...');
+                console.log('SW: Attivazione...');
                 event.waitUntil(
                     caches.keys().then(cacheNames => {
                         return Promise.all(
-                            cacheNames.map(cache => {
-                                if (cache !== CACHE_NAME) {
-                                    console.log('Service Worker: Rimozione vecchia cache:', cache);
-                                    return caches.delete(cache);
-                                }
-                            })
+                            cacheNames.filter(cache => cache !== CACHE_NAME)
+                                      .map(cache => caches.delete(cache))
                         );
                     }).then(() => self.clients.claim())
                 );
@@ -1848,9 +1846,7 @@
             self.addEventListener('fetch', event => {
                 event.respondWith(
                     caches.match(event.request)
-                        .then(response => {
-                            return response || fetch(event.request);
-                        })
+                        .then(response => response || fetch(event.request))
                 );
             });
         `;
@@ -1861,13 +1857,17 @@
                 const swUrl = URL.createObjectURL(swBlob);
                 navigator.serviceWorker.register(swUrl, { scope: './' })
                     .then(registration => {
-                        console.log('Service Worker registrato con successo. Scope:', registration.scope);
+                        console.log('PWA DEBUG: Service Worker registrato con successo. Scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('PWA DEBUG: Registrazione del Service Worker fallita:', error);
                     });
             } catch (error) {
-                 console.error('Registrazione del Service Worker fallita:', error);
+                 console.error('PWA DEBUG: Errore nella creazione del Blob per il Service Worker:', error);
             }
         }
     });
     </script>
 </body>
 </html>
+
