@@ -1,0 +1,15 @@
+{
+    "name": "Gestore Documenti PWA",
+    "short_name": "GestoreDoc",
+    "id": "/?v=1",
+    "start_url": ".",
+    "display": "fullscreen",
+    "orientation": "portrait",
+    "background_color": "#f3f4f6",
+    "theme_color": "#317EFB",
+    "description": "Un semplice gestore di documenti PWA per organizzarli e ricercarli.",
+    "icons": [
+        { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+        { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+    ]
+}
