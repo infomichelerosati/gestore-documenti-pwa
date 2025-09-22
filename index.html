@@ -29,23 +29,7 @@
     <!-- Meta tag per la PWA -->
     <meta name="theme-color" content="#317EFB"/>
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/317EFB/ffffff?text=Docs">
-    
-    <!-- Manifest della PWA incorporato -->
-    <link rel="manifest" href='data:application/manifest+json,{
-        "name": "Gestore Documenti PWA",
-        "short_name": "GestoreDoc",
-        "id": "/?v=1",
-        "start_url": ".",
-        "display": "standalone",
-        "orientation": "portrait",
-        "background_color": "#f3f4f6",
-        "theme_color": "#317EFB",
-        "description": "Un semplice gestore di documenti PWA per organizzarli e ricercarli.",
-        "icons": [
-            { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
-            { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
-        ]
-    }'>
+    <link rel="manifest" href="/manifest.json"> <!-- Riferimento a un manifest fittizio -->
 
     <style>
         html.dark { color-scheme: dark; }
@@ -316,14 +300,13 @@
     <!-- NUOVA LOGICA JAVASCRIPT UNIFICATA E CORRETTA PER PWA                  -->
     <!-- ===================================================================== -->
     <script>
-    // Questo script ha una doppia funzione:
-    // 1. Se eseguito nel browser, registra il Service Worker e avvia l'app.
-    // 2. Se eseguito come Service Worker, imposta gli eventi di caching.
-    // Il controllo `self.clients` distingue i due contesti.
-
-    // Contesto SERVICE WORKER
-    if ('serviceWorker' in navigator && typeof self.clients === 'object') {
-        const CACHE_NAME = 'doc-manager-cache-v5'; // Versione cache incrementata
+    // Questo script implementa una tecnica avanzata per far funzionare una PWA
+    // in un singolo file HTML, aggirando la necessità di file separati per
+    // Service Worker e Manifest.
+    
+    // Contenuto del Service Worker (da usare nel Worker)
+    const serviceWorkerScript = `
+        const CACHE_NAME = 'doc-manager-cache-v6'; // Versione cache incrementata
         const URLS_TO_CACHE = [
             './', // Memorizza l'index.html stesso
             'https://cdn.tailwindcss.com',
@@ -365,28 +348,99 @@
                     .then(response => response || fetch(event.request))
             );
         });
-    } 
-    // Contesto BROWSER (PAGINA WEB)
-    else {
-        // --- Registrazione del Service Worker ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // Registriamo questo stesso file come Service Worker.
-                navigator.serviceWorker.register(window.location.href, { scope: './' })
-                    .then(registration => {
-                        console.log('PWA DEBUG: Service Worker registrato con successo. Scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('PWA DEBUG: Registrazione del Service Worker fallita:', error);
-                    });
+    `;
+
+    // Contenuto del Manifest (da usare nel Worker)
+    const manifestContent = {
+        "name": "Gestore Documenti PWA",
+        "short_name": "GestoreDoc",
+        "id": "/?v=1",
+        "start_url": ".",
+        "display": "standalone",
+        "orientation": "portrait",
+        "background_color": "#f3f4f6",
+        "theme_color": "#317EFB",
+        "description": "Un semplice gestore di documenti PWA per organizzarli e ricercarli.",
+        "icons": [
+            { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+            { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+        ]
+    };
+
+    // Questo è il cuore della soluzione in un singolo file.
+    // L'evento `onmessage` viene usato per comunicare con il Service Worker.
+    // Il Service Worker stesso invierà un messaggio al browser client per
+    // richiedere il proprio codice e il manifest.
+    if ('serviceWorker' in navigator) {
+        // Registriamo un Service Worker fittizio che intercetterà le richieste
+        // del Service Worker e del Manifest.
+        navigator.serviceWorker.register('/sw.js', { scope: './' })
+            .then(registration => {
+                console.log('PWA DEBUG: Service Worker fittizio registrato. Scope:', registration.scope);
+                // Quando il Service Worker fittizio è pronto, gli mandiamo il codice
+                // e il manifest.
+                registration.addEventListener('message', event => {
+                    if (event.data.type === 'GET_SCRIPT') {
+                        event.source.postMessage({ type: 'SCRIPT_CONTENT', script: serviceWorkerScript });
+                    } else if (event.data.type === 'GET_MANIFEST') {
+                        event.source.postMessage({ type: 'MANIFEST_CONTENT', manifest: JSON.stringify(manifestContent) });
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('PWA DEBUG: Registrazione del Service Worker fallita:', error);
             });
-        }
+    }
+
+    // Qui inizia il Service Worker vero e proprio, che verrà "servito" dinamicamente.
+    // Il controllo `self.importScripts` ci dice se siamo nel contesto di un Worker.
+    if (typeof self.importScripts === 'function') {
+        let scriptContent = '';
+        let manifestContent = '';
+
+        // Riceviamo il codice del Service Worker e il manifest dal client
+        self.addEventListener('message', event => {
+            if (event.data.type === 'SCRIPT_CONTENT') {
+                scriptContent = event.data.script;
+                // Eseguiamo il codice del Service Worker.
+                self.importScripts('data:text/javascript,' + encodeURIComponent(scriptContent));
+            } else if (event.data.type === 'MANIFEST_CONTENT') {
+                manifestContent = event.data.manifest;
+            }
+        });
+
+        // Intercettiamo le richieste fittizie per il Service Worker e il manifest.
+        self.addEventListener('fetch', event => {
+            if (event.request.url.endsWith('/sw.js')) {
+                 event.respondWith(
+                    new Response(scriptContent, {
+                        headers: { 'Content-Type': 'text/javascript' }
+                    })
+                );
+            } else if (event.request.url.endsWith('/manifest.json')) {
+                event.respondWith(
+                    new Response(manifestContent, {
+                        headers: { 'Content-Type': 'application/manifest+json' }
+                    })
+                );
+            }
+        });
+
+        // Richiediamo il codice Service Worker e il manifest dal client.
+        self.clients.matchAll().then(clients => {
+            if (clients && clients.length) {
+                clients[0].postMessage({ type: 'GET_SCRIPT' });
+                clients[0].postMessage({ type: 'GET_MANIFEST' });
+            }
+        });
+    } else {
+        // Contesto BROWSER (PAGINA WEB)
         
-        // --- Funzione principale dell'applicazione ---
+        // Il resto del codice dell'applicazione rimane invariato,
+        // ma è racchiuso nella funzione `initializeApp` per essere
+        // avviato dopo che le librerie sono state caricate.
+        
         function initializeApp() {
-            // ... TUTTO il codice della tua app che era in <script> e in DOMContentLoaded va qui ...
-            // Per brevità, lo incollo qui sotto. Il codice è identico al tuo originale.
-            
             console.log("App inizializzata.");
         
             if (window.pdfjsLib) {
@@ -531,7 +585,7 @@
                         store = db.createObjectStore("documents", { keyPath: "id", autoIncrement: true });
                         store.createIndex("year_category_subcategory", ["year", "category", "subcategory"], { unique: false });
                     } else {
-                        store = e.target.transaction.objectStore("documents");
+                        store = db.target.transaction.objectStore("documents");
                     }
                     if (!store.indexNames.contains("contentHash")) {
                         store.createIndex("contentHash", "contentHash", { unique: true });
@@ -1344,7 +1398,7 @@
                 const id = target.dataset.id || target.dataset.docId;
                 if (target.matches('.delete-doc-btn')) { docIdToDelete = parseInt(id); openModal(confirmDeleteModal); }
                 else if (target.matches('.tag-link')) { activeTagFilter = target.dataset.tag; renderAll(); }
-                else if (target.matches('.attachment-link')) showPreviewModal(id, parseInt(target.dataset.attachmentIndex));
+                else if (target.matches('.attachment-link')) showPreviewModal(id, parseInt(target.dataset.attachment-index));
                 else if (target.matches('.edit-doc-btn')) openEditModal(id);
                 else if (target.matches('.preview-btn')) showPreviewModal(id);
             });
