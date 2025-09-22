@@ -29,7 +29,7 @@
     <!-- Meta tag per la PWA -->
     <meta name="theme-color" content="#317EFB"/>
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/317EFB/ffffff?text=Docs">
-    <link rel="manifest" href="/manifest.json"> <!-- Riferimento a un manifest fittizio -->
+    <link rel="manifest" href="manifest.json"> <!-- Collegamento al file manifest -->
 
     <style>
         html.dark { color-scheme: dark; }
@@ -297,148 +297,21 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- NUOVA LOGICA JAVASCRIPT UNIFICATA E CORRETTA PER PWA                  -->
+    <!-- LOGICA JAVASCRIPT CORRETTA PER PWA                  -->
     <!-- ===================================================================== -->
     <script>
-    // Questo script implementa una tecnica avanzata per far funzionare una PWA
-    // in un singolo file HTML, aggirando la necessità di file separati per
-    // Service Worker e Manifest.
-    
-    // Contenuto del Service Worker (da usare nel Worker)
-    const serviceWorkerScript = `
-        const CACHE_NAME = 'doc-manager-cache-v6'; // Versione cache incrementata
-        const URLS_TO_CACHE = [
-            './', // Memorizza l'index.html stesso
-            'https://cdn.tailwindcss.com',
-            'https://cdn.jsdelivr.net/npm/lucide@0.378.0/dist/umd/lucide.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-            'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-            'https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
-        ];
-
-        self.addEventListener('install', event => {
-            console.log('SW: Installazione...');
-            event.waitUntil(
-                caches.open(CACHE_NAME)
-                    .then(cache => cache.addAll(URLS_TO_CACHE))
-                    .then(() => self.skipWaiting())
-            );
-        });
-
-        self.addEventListener('activate', event => {
-            console.log('SW: Attivazione...');
-            event.waitUntil(
-                caches.keys().then(cacheNames => {
-                    return Promise.all(
-                        cacheNames.filter(cache => cache !== CACHE_NAME)
-                                  .map(cache => caches.delete(cache))
-                    );
-                }).then(() => self.clients.claim())
-            );
-        });
-
-        self.addEventListener('fetch', event => {
-             // Strategia: Cache first, poi network.
-            event.respondWith(
-                caches.match(event.request)
-                    .then(response => response || fetch(event.request))
-            );
-        });
-    `;
-
-    // Contenuto del Manifest (da usare nel Worker)
-    const manifestContent = {
-        "name": "Gestore Documenti PWA",
-        "short_name": "GestoreDoc",
-        "id": "/?v=1",
-        "start_url": ".",
-        "display": "standalone",
-        "orientation": "portrait",
-        "background_color": "#f3f4f6",
-        "theme_color": "#317EFB",
-        "description": "Un semplice gestore di documenti PWA per organizzarli e ricercarli.",
-        "icons": [
-            { "src": "https://placehold.co/192x192/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
-            { "src": "https://placehold.co/512x512/317EFB/ffffff?text=Docs", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
-        ]
-    };
-
-    // Questo è il cuore della soluzione in un singolo file.
-    // L'evento `onmessage` viene usato per comunicare con il Service Worker.
-    // Il Service Worker stesso invierà un messaggio al browser client per
-    // richiedere il proprio codice e il manifest.
-    if ('serviceWorker' in navigator) {
-        // Registriamo un Service Worker fittizio che intercetterà le richieste
-        // del Service Worker e del Manifest.
-        navigator.serviceWorker.register('/sw.js', { scope: './' })
-            .then(registration => {
-                console.log('PWA DEBUG: Service Worker fittizio registrato. Scope:', registration.scope);
-                // Quando il Service Worker fittizio è pronto, gli mandiamo il codice
-                // e il manifest.
-                registration.addEventListener('message', event => {
-                    if (event.data.type === 'GET_SCRIPT') {
-                        event.source.postMessage({ type: 'SCRIPT_CONTENT', script: serviceWorkerScript });
-                    } else if (event.data.type === 'GET_MANIFEST') {
-                        event.source.postMessage({ type: 'MANIFEST_CONTENT', manifest: JSON.stringify(manifestContent) });
-                    }
-                });
-            })
-            .catch(error => {
-                console.error('PWA DEBUG: Registrazione del Service Worker fallita:', error);
-            });
-    }
-
-    // Qui inizia il Service Worker vero e proprio, che verrà "servito" dinamicamente.
-    // Il controllo `self.importScripts` ci dice se siamo nel contesto di un Worker.
-    if (typeof self.importScripts === 'function') {
-        let scriptContent = '';
-        let manifestContent = '';
-
-        // Riceviamo il codice del Service Worker e il manifest dal client
-        self.addEventListener('message', event => {
-            if (event.data.type === 'SCRIPT_CONTENT') {
-                scriptContent = event.data.script;
-                // Eseguiamo il codice del Service Worker.
-                self.importScripts('data:text/javascript,' + encodeURIComponent(scriptContent));
-            } else if (event.data.type === 'MANIFEST_CONTENT') {
-                manifestContent = event.data.manifest;
-            }
-        });
-
-        // Intercettiamo le richieste fittizie per il Service Worker e il manifest.
-        self.addEventListener('fetch', event => {
-            if (event.request.url.endsWith('/sw.js')) {
-                 event.respondWith(
-                    new Response(scriptContent, {
-                        headers: { 'Content-Type': 'text/javascript' }
+        document.addEventListener('DOMContentLoaded', () => {
+            if ('serviceWorker' in navigator) {
+                // Registra il Service Worker
+                navigator.serviceWorker.register('service-worker.js', { scope: './' })
+                    .then(registration => {
+                        console.log('PWA: Service Worker registrato con successo. Scope:', registration.scope);
                     })
-                );
-            } else if (event.request.url.endsWith('/manifest.json')) {
-                event.respondWith(
-                    new Response(manifestContent, {
-                        headers: { 'Content-Type': 'application/manifest+json' }
-                    })
-                );
+                    .catch(error => {
+                        console.error('PWA: Registrazione del Service Worker fallita:', error);
+                    });
             }
         });
-
-        // Richiediamo il codice Service Worker e il manifest dal client.
-        self.clients.matchAll().then(clients => {
-            if (clients && clients.length) {
-                clients[0].postMessage({ type: 'GET_SCRIPT' });
-                clients[0].postMessage({ type: 'GET_MANIFEST' });
-            }
-        });
-    } else {
-        // Contesto BROWSER (PAGINA WEB)
-        
-        // Il resto del codice dell'applicazione rimane invariato,
-        // ma è racchiuso nella funzione `initializeApp` per essere
-        // avviato dopo che le librerie sono state caricate.
         
         function initializeApp() {
             console.log("App inizializzata.");
@@ -1568,7 +1441,6 @@
                 }
             }, 500);
         });
-    }
     </script>
 </body>
 </html>
