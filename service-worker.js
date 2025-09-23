@@ -1,4 +1,4 @@
-const CACHE_NAME = 'doc-manager-cache-v7'; // Incrementa la versione della cache
+const CACHE_NAME = 'doc-manager-cache-v8'; // Incrementa la versione della cache
 const URLS_TO_CACHE = [
     './',
     './index.html',
@@ -41,3 +41,4 @@ self.addEventListener('fetch', event => {
             .then(response => response || fetch(event.request))
     );
 });
+
