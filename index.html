@@ -819,31 +819,46 @@
                 }
             }
             
-            async function renderPdfToCanvas(canvas, fileData, options = {}) {
-                if (!canvas || !fileData) return;
+            // =====================================================================
+            // MODIFICA: Funzione per renderizzare PDF (multi-pagina e alta qualità)
+            // =====================================================================
+            async function renderPdfToCanvas(container, fileData, options = {}) {
+                container.innerHTML = ''; // Pulisce il contenitore
                 try {
                     const pdfjsLib = getPdfjsLib();
                     if (!pdfjsLib) throw new Error("PDF.js library not found");
+
                     const typedarray = new Uint8Array(atob(fileData.split(',')[1]).split('').map(char => char.charCodeAt(0)));
                     const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                    const page = await pdf.getPage(1);
-                    let scale = 1.0;
-                    const viewport = page.getViewport({ scale: scale });
-                    if (options.isThumbnail) scale = 128 / viewport.height;
-                    else if (options.isModal) {
-                        const container = canvas.parentElement;
-                        if (container) scale = Math.min(container.clientWidth / viewport.width, container.clientHeight / viewport.height);
-                    } else scale = (canvas.parentElement.clientWidth - 20) / viewport.width;
-                    const scaledViewport = page.getViewport({ scale: scale });
-                    canvas.height = scaledViewport.height; canvas.width = scaledViewport.width;
-                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: scaledViewport }).promise;
+
+                    // Itera su tutte le pagine del PDF
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const scale = 1.5; // Aumenta la scala per una migliore qualità
+                        const viewport = page.getViewport({ scale: scale });
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        // Stile per visualizzare correttamente il canvas nel contenitore
+                        canvas.style.width = '100%';
+                        canvas.style.height = 'auto';
+                        canvas.style.display = 'block';
+                        canvas.style.marginBottom = '8px';
+                        canvas.style.borderRadius = '4px';
+                        
+                        container.appendChild(canvas);
+
+                        await page.render({
+                            canvasContext: canvas.getContext('2d'),
+                            viewport: viewport
+                        }).promise;
+                    }
                 } catch (error) {
                     console.error(`Error rendering PDF preview:`, error);
-                    const container = canvas.parentElement;
-                    if (container) {
-                        container.innerHTML = `<div class="text-center text-red-500 p-4"><i data-lucide="file-warning" class="mx-auto h-16 w-16"></i><p class="mt-2 text-sm">Errore anteprima PDF</p></div>`;
-                        lucide.createIcons();
-                    }
+                    container.innerHTML = `<div class="text-center text-red-500 p-4"><i data-lucide="file-warning" class="mx-auto h-16 w-16"></i><p class="mt-2 text-sm">Errore durante la visualizzazione del PDF</p></div>`;
+                    lucide.createIcons();
                 }
             }
 
@@ -862,8 +877,15 @@
                     const fileType = file.type || getMimeTypeFromName(file.name);
                     if (fileType.startsWith('image/')) previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
                     else if (fileType === 'application/pdf') {
+                         // Per la piccola anteprima nel form, basta la prima pagina
                         previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
-                        renderPdfToCanvas(previewEl.querySelector('canvas'), e.target.result);
+                        const singlePageContainer = {
+                            appendChild: (canvas) => previewEl.innerHTML = '', // clear and replace
+                            _canvas: null,
+                            get querySelectorAll() { return () => [this._canvas] }, // fake for print
+                        };
+                         renderPdfToCanvas(previewEl, e.target.result);
+
                     } else {
                         previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
                         lucide.createIcons();
@@ -943,7 +965,18 @@
                 if (doc.fileType?.startsWith('image/')) previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima"></div>`;
                 else if (doc.fileType === 'application/pdf') {
                     previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
-                    setTimeout(() => renderPdfToCanvas(document.getElementById(`pdf-canvas-${doc.id}`), doc.fileData, { isThumbnail: true }), 0);
+                    setTimeout(() => {
+                         const canvas = document.getElementById(`pdf-canvas-${doc.id}`);
+                         if (canvas) {
+                             const singlePageContainer = { appendChild: (c) => {
+                                 const ctx = canvas.getContext('2d');
+                                 canvas.width = c.width;
+                                 canvas.height = c.height;
+                                 ctx.drawImage(c, 0, 0);
+                             }};
+                             renderPdfToCanvas(singlePageContainer, doc.fileData, { isThumbnail: true });
+                         }
+                    }, 0);
                 }
                 card.innerHTML = `${previewHTML}<div class="p-3 flex-grow flex flex-col"><h3 class="font-semibold text-sm truncate flex-grow" title="${doc.displayName}">${doc.displayName}</h3><p class="text-xs text-gray-500 truncate">${doc.category} / ${doc.subcategory}</p></div>`;
                 docListContainer.appendChild(card);
@@ -1046,6 +1079,9 @@
                 });
             }
             
+            // =====================================================================
+            // MODIFICA: Funzione di rendering anteprima che usa il nuovo renderer PDF
+            // =====================================================================
             const renderPreviewContent = async (fileData, fileType, fileName) => {
                 previewContent.innerHTML = `<div class="text-white"><div class="ocr-loader mx-auto"></div><p class="mt-2">Caricamento anteprima...</p></div>`;
                 try {
@@ -1055,10 +1091,12 @@
                         img.className = 'max-w-full max-h-full object-contain';
                         previewContent.innerHTML = ''; previewContent.appendChild(img);
                     } else if (fileType === 'application/pdf') {
-                        const canvas = document.createElement('canvas');
-                        canvas.className = 'max-w-full max-h-full object-contain bg-white rounded-md shadow-lg';
-                        previewContent.innerHTML = ''; previewContent.appendChild(canvas);
-                        await renderPdfToCanvas(canvas, fileData, { isModal: true });
+                        const pdfContainer = document.createElement('div');
+                        // Questo contenitore conterrà tutte le pagine del PDF e sarà scorrevole
+                        pdfContainer.className = "w-full h-full overflow-y-auto pdf-preview-container flex flex-col items-center p-4";
+                        previewContent.innerHTML = '';
+                        previewContent.appendChild(pdfContainer);
+                        await renderPdfToCanvas(pdfContainer, fileData); // Chiama la nuova funzione
                     } else if (fileType.endsWith('.document') || fileName.endsWith('.docx')) {
                         const docContainer = document.createElement('div');
                         docContainer.className = "bg-white p-8 rounded-md w-full h-full overflow-y-auto text-black";
@@ -1302,8 +1340,7 @@
                     docTagsInput.value = '';
                 }
             });
-
-            // CORREZIONE: Aggiunto evento 'blur' per migliorare l'usabilità su mobile
+            
             docTagsInput.addEventListener('blur', () => {
                 if (docTagsInput.value.trim()) {
                     addTag(docTagsInput.value);
@@ -1330,18 +1367,39 @@
 
             closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
             
+            // =====================================================================
+            // MODIFICA: Gestione della stampa per PDF multi-pagina
+            // =====================================================================
             printBtn.addEventListener('click', () => {
-                const contentEl = previewContent.querySelector('canvas, img, div.docx-wrapper, div.excel-preview-container');
-                if (contentEl) {
+                const pdfContainer = previewContent.querySelector('.pdf-preview-container');
+                if (pdfContainer && pdfContainer.querySelectorAll('canvas').length > 0) {
+                    // Gestione stampa per PDF multi-pagina
                     const printWindow = window.open('', '_blank');
-                    if(contentEl.matches('canvas, img')) {
-                        const dataUrl = contentEl.tagName === 'CANVAS' ? contentEl.toDataURL('image/png') : contentEl.src;
-                        printWindow.document.write(`<html><body style="text-align:center;"><img src="${dataUrl}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
-                    } else {
-                        printWindow.document.write('<html><head><title>Stampa Documento</title></head><body>' + contentEl.innerHTML + '</body></html>');
-                    }
-                    printWindow.document.close(); printWindow.focus();
-                } else showSnackbar("Stampa non disponibile per questo file.", true);
+                    let imagesHTML = '';
+                    pdfContainer.querySelectorAll('canvas').forEach(canvas => {
+                        imagesHTML += `<img src="${canvas.toDataURL('image/png')}" style="width: 100%; display: block; margin-bottom: 5px; page-break-after: always;">`;
+                    });
+                    printWindow.document.write(`<html><head><title>Stampa Documento</title></head><body>${imagesHTML}</body></html>`);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 500);
+                } else {
+                    // Logica originale per altri tipi di file
+                    const contentEl = previewContent.querySelector('img, div.docx-wrapper, div.excel-preview-container');
+                    if (contentEl) {
+                        const printWindow = window.open('', '_blank');
+                        if(contentEl.matches('img')) {
+                            printWindow.document.write(`<html><body style="text-align:center;"><img src="${contentEl.src}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
+                        } else {
+                            printWindow.document.write('<html><head><title>Stampa Documento</title></head><body>' + contentEl.innerHTML + '</body></html>');
+                        }
+                        printWindow.document.close();
+                        printWindow.focus();
+                    } else showSnackbar("Stampa non disponibile per questo file.", true);
+                }
             });
 
             editPreviewBtn.addEventListener('click', () => { if (currentPreviewDoc) { closeModal(previewModal); openEditModal(currentPreviewDoc.id); } });
@@ -1394,14 +1452,10 @@
 
             importBtn.addEventListener('click', () => importFileInput.click());
             
-            // =====================================================================
-            // BLOCCO DI IMPORTAZIONE CORRETTO E ROBUSTO
-            // =====================================================================
             importFileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
 
-                // Mostra la modal di caricamento
                 importProgressText.textContent = "Preparazione dell'archivio...";
                 importProgressBar.style.width = '0%';
                 importProgressPercentage.textContent = '0%';
@@ -1422,7 +1476,6 @@
                         const totalDocs = metadata.length;
                         showSnackbar(`Inizio importazione di ${totalDocs} documenti...`);
 
-                        // 1. Pulisce il DB in una transazione separata e attende il completamento
                         await new Promise((resolve, reject) => {
                             const tx = db.transaction("documents", "readwrite");
                             tx.oncomplete = () => resolve();
@@ -1430,16 +1483,14 @@
                             tx.objectStore("documents").clear();
                         });
 
-                        // 2. Itera su ogni documento e lo salva in una nuova transazione
                         for (let i = 0; i < totalDocs; i++) {
                             const docMeta = metadata[i];
-                            const progress = ((i + 1) / totalDocs) * 90 + 5; // Avanzamento da 5% a 95%
+                            const progress = ((i + 1) / totalDocs) * 90 + 5;
 
                             importProgressText.textContent = `Importazione: ${docMeta.displayName || docMeta.fileName} (${i + 1}/${totalDocs})`;
                             importProgressBar.style.width = `${progress}%`;
                             importProgressPercentage.textContent = `${Math.round(progress)}%`;
 
-                            // Processa file principale e allegati
                             if (zip.file(docMeta.filePath)) {
                                 const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
                                 docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
@@ -1460,10 +1511,8 @@
                             }
                             delete docMeta.id;
                             
-                            // Salva il documento in una transazione dedicata
                             await Crud.save(docMeta, false);
 
-                            // Piccola pausa per permettere all'interfaccia di aggiornarsi
                             if (i % 10 === 0) {
                                 await new Promise(res => setTimeout(res, 1));
                             }
@@ -1483,7 +1532,6 @@
                         closeModal(importLoadingModal);
                         showSnackbar(`Errore durante l'importazione: ${error.message}`, true);
                         console.error("Import error:", error);
-                        // Ricarica i dati esistenti in caso di fallimento
                         renderAll();
                     } finally {
                         importFileInput.value = '';
@@ -1543,3 +1591,4 @@
     </script>
 </body>
 </html>
+
