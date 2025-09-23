@@ -296,6 +296,18 @@
         <button id="reload-page-btn" class="bg-blue-600 hover:bg-blue-700 font-bold py-2 px-6 rounded-lg">Ricarica Pagina</button>
     </div>
 
+    <!-- NUOVO: Modal di Caricamento per l'Importazione -->
+    <div id="import-loading-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex flex-col items-center justify-center p-4 z-50 text-white text-center">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
+            <h2 class="text-xl font-bold mb-4">Importazione in corso...</h2>
+            <p id="import-progress-text" class="text-sm text-gray-300 mb-4 h-10">Preparazione dell'archivio...</p>
+            <div class="w-full bg-gray-600 rounded-full h-4">
+                <div id="import-progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="import-progress-percentage" class="mt-2 text-lg font-semibold">0%</p>
+        </div>
+    </div>
+
     <!-- ===================================================================== -->
     <!-- LOGICA JAVASCRIPT CORRETTA PER PWA                  -->
     <!-- ===================================================================== -->
@@ -388,6 +400,12 @@
                 docForm['doc-subcategory'], docForm['doc-details']
             ];
             
+            // Variabili per la nuova modal di caricamento
+            const importLoadingModal = document.getElementById('import-loading-modal');
+            const importProgressText = document.getElementById('import-progress-text');
+            const importProgressBar = document.getElementById('import-progress-bar');
+            const importProgressPercentage = document.getElementById('import-progress-percentage');
+
             const selectedTagsContainer = document.getElementById('selected-tags-container');
             const docTagsInput = document.getElementById('doc-tags-input');
             const availableTagsSection = document.getElementById('available-tags-section');
@@ -877,7 +895,7 @@
                             case 'year_asc': return a.year - b.year;
                             case 'year_desc': return b.year - a.year;
                             case 'date_asc': return a.uploadDate - b.uploadDate;
-                            default: return b.uploadDate - a.uploadDate;
+                            default: return b.uploadDate - b.uploadDate;
                         }
                     });
                     fullFilteredDocs = filteredDocs;
@@ -1278,15 +1296,35 @@
 
             docTagsInput.addEventListener('keydown', e => {
                 if (e.key === ',' || e.key === 'Enter') {
-                    e.preventDefault(); addTag(docTagsInput.value); docTagsInput.value = '';
+                    e.preventDefault();
+                    addTag(docTagsInput.value);
+                    docTagsInput.value = '';
                 }
             });
+
+            // CORREZIONE: Aggiunto evento 'blur' per migliorare l'usabilità su mobile
+            docTagsInput.addEventListener('blur', () => {
+                if (docTagsInput.value.trim()) {
+                    addTag(docTagsInput.value);
+                    docTagsInput.value = '';
+                }
+            });
+
             selectedTagsContainer.addEventListener('click', e => {
                 const removeBtn = e.target.closest('.remove-tag-btn');
-                if (removeBtn) { currentTagsSet.delete(removeBtn.dataset.tag); updateTagsUI(); }
-                else docTagsInput.focus();
+                if (removeBtn) {
+                    currentTagsSet.delete(removeBtn.dataset.tag);
+                    updateTagsUI();
+                } else {
+                    docTagsInput.focus();
+                }
             });
-            availableTagsContainer.addEventListener('click', e => { if (e.target.closest('.add-tag-btn')) addTag(e.target.dataset.tag); });
+
+            availableTagsContainer.addEventListener('click', e => {
+                if (e.target.closest('.add-tag-btn')) {
+                    addTag(e.target.dataset.tag);
+                }
+            });
             categoryInput.addEventListener('input', (e) => updateCategoryScopedTags(e.target.value));
 
             closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
@@ -1354,41 +1392,97 @@
             });
 
             importBtn.addEventListener('click', () => importFileInput.click());
+            
+            // MODIFICATO: Gestione dell'importazione con barra di avanzamento
             importFileInput.addEventListener('change', (event) => {
-                const file = event.target.files[0]; if (!file) return;
-                showSnackbar("Importazione in corso...");
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Mostra la modal di caricamento
+                importProgressText.textContent = "Preparazione dell'archivio...";
+                importProgressBar.style.width = '0%';
+                importProgressPercentage.textContent = '0%';
+                openModal(importLoadingModal);
+
                 const reader = new FileReader();
                 reader.onload = async (e) => {
                     try {
                         const zip = await JSZip.loadAsync(e.target.result);
                         const metadataFile = zip.file("metadata.json");
                         if (!metadataFile) throw new Error("File metadata.json non trovato.");
+
+                        importProgressText.textContent = "Lettura metadati...";
+                        importProgressBar.style.width = '5%';
+                        importProgressPercentage.textContent = '5%';
+
                         const metadata = JSON.parse(await metadataFile.async("string"));
-                        Crud.clear(async () => {
-                            showSnackbar(`Importazione di ${metadata.length} documenti...`);
-                            for (const docMeta of metadata) {
-                                 if (!zip.file(docMeta.filePath)) continue;
-                                 const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
-                                 docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
-                                 docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
-                                 delete docMeta.filePath;
-                                 if (docMeta.attachments) {
-                                    for(let attMeta of docMeta.attachments) {
-                                        if (!zip.file(attMeta.filePath)) continue;
-                                        const attFileBlob = await zip.file(attMeta.filePath).async("blob");
-                                        attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
-                                        attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
-                                        delete attMeta.filePath;
+                        const totalDocs = metadata.length;
+
+                        // Pulisce il DB e poi avvia il ciclo di importazione
+                        await new Promise((resolve, reject) => {
+                             Crud.clear(async () => {
+                                try {
+                                    showSnackbar(`Inizio importazione di ${totalDocs} documenti...`);
+                                    const tx = db.transaction("documents", "readwrite");
+                                    const store = tx.objectStore("documents");
+
+                                    for (let i = 0; i < totalDocs; i++) {
+                                        const docMeta = metadata[i];
+                                        const progress = ((i + 1) / totalDocs) * 90 + 5; // Avanzamento da 5% a 95%
+
+                                        importProgressText.textContent = `Importazione: ${docMeta.displayName || docMeta.fileName} (${i + 1}/${totalDocs})`;
+                                        importProgressBar.style.width = `${progress}%`;
+                                        importProgressPercentage.textContent = `${Math.round(progress)}%`;
+
+                                        if (!zip.file(docMeta.filePath)) continue;
+                                        const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
+                                        docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
+                                        docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
+                                        delete docMeta.filePath;
+                                        if (docMeta.attachments) {
+                                            for(let attMeta of docMeta.attachments) {
+                                                if (!zip.file(attMeta.filePath)) continue;
+                                                const attFileBlob = await zip.file(attMeta.filePath).async("blob");
+                                                attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
+                                                attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
+                                                delete attMeta.filePath;
+                                            }
+                                        }
+                                        delete docMeta.id;
+                                        docMeta.contentHash = await calculateFileHash(new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType }));
+                                        
+                                        store.put(docMeta);
+
+                                        // Pausa per permettere all'UI di aggiornarsi
+                                        if (i % 5 === 0) {
+                                            await new Promise(res => setTimeout(res, 1));
+                                        }
                                     }
-                                 }
-                                 delete docMeta.id;
-                                 docMeta.contentHash = await calculateFileHash(new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType }));
-                                 db.transaction("documents", "readwrite").objectStore("documents").put(docMeta);
-                            }
-                            showSnackbar('Importazione completata!'); renderAll();
+                                    tx.oncomplete = resolve;
+                                    tx.onerror = reject;
+                                } catch(err) {
+                                    reject(err);
+                                }
+                            });
                         });
-                    } catch (error) { showSnackbar("Errore: il file di backup non è valido.", true); console.error("Import error:", error); }
-                    finally { importFileInput.value = ''; }
+                        
+                        importProgressText.textContent = "Finalizzazione...";
+                        importProgressBar.style.width = '100%';
+                        importProgressPercentage.textContent = '100%';
+
+                        setTimeout(() => {
+                            closeModal(importLoadingModal);
+                            showSnackbar('Importazione completata!');
+                            renderAll();
+                        }, 500);
+
+                    } catch (error) {
+                        closeModal(importLoadingModal);
+                        showSnackbar("Errore: il file di backup non è valido.", true);
+                        console.error("Import error:", error);
+                    } finally {
+                        importFileInput.value = '';
+                    }
                 };
                 reader.readAsArrayBuffer(file);
             });
@@ -1444,3 +1538,4 @@
     </script>
 </body>
 </html>
+
