@@ -1418,52 +1418,43 @@
                         const totalDocs = metadata.length;
 
                         // Pulisce il DB e poi avvia il ciclo di importazione
-                        await new Promise((resolve, reject) => {
-                             Crud.clear(async () => {
-                                try {
-                                    showSnackbar(`Inizio importazione di ${totalDocs} documenti...`);
-                                    const tx = db.transaction("documents", "readwrite");
-                                    const store = tx.objectStore("documents");
+                        await new Promise(resolve => Crud.clear(resolve));
 
-                                    for (let i = 0; i < totalDocs; i++) {
-                                        const docMeta = metadata[i];
-                                        const progress = ((i + 1) / totalDocs) * 90 + 5; // Avanzamento da 5% a 95%
+                        showSnackbar(`Inizio importazione di ${totalDocs} documenti...`);
 
-                                        importProgressText.textContent = `Importazione: ${docMeta.displayName || docMeta.fileName} (${i + 1}/${totalDocs})`;
-                                        importProgressBar.style.width = `${progress}%`;
-                                        importProgressPercentage.textContent = `${Math.round(progress)}%`;
+                        for (let i = 0; i < totalDocs; i++) {
+                            const docMeta = metadata[i];
+                            const progress = ((i + 1) / totalDocs) * 90 + 5; // Avanzamento da 5% a 95%
 
-                                        if (!zip.file(docMeta.filePath)) continue;
-                                        const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
-                                        docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
-                                        docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
-                                        delete docMeta.filePath;
-                                        if (docMeta.attachments) {
-                                            for(let attMeta of docMeta.attachments) {
-                                                if (!zip.file(attMeta.filePath)) continue;
-                                                const attFileBlob = await zip.file(attMeta.filePath).async("blob");
-                                                attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
-                                                attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
-                                                delete attMeta.filePath;
-                                            }
-                                        }
-                                        delete docMeta.id;
-                                        docMeta.contentHash = await calculateFileHash(new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType }));
-                                        
-                                        store.put(docMeta);
+                            importProgressText.textContent = `Importazione: ${docMeta.displayName || docMeta.fileName} (${i + 1}/${totalDocs})`;
+                            importProgressBar.style.width = `${progress}%`;
+                            importProgressPercentage.textContent = `${Math.round(progress)}%`;
 
-                                        // Pausa per permettere all'UI di aggiornarsi
-                                        if (i % 5 === 0) {
-                                            await new Promise(res => setTimeout(res, 1));
-                                        }
-                                    }
-                                    tx.oncomplete = resolve;
-                                    tx.onerror = reject;
-                                } catch(err) {
-                                    reject(err);
+                            if (!zip.file(docMeta.filePath)) continue;
+                            const mainFileBlob = await zip.file(docMeta.filePath).async("blob");
+                            docMeta.fileData = (await readFileAsDataURL(mainFileBlob)).fileData;
+                            docMeta.fileType = mainFileBlob.type || getMimeTypeFromName(docMeta.fileName);
+                            delete docMeta.filePath;
+                            if (docMeta.attachments) {
+                                for(let attMeta of docMeta.attachments) {
+                                    if (!zip.file(attMeta.filePath)) continue;
+                                    const attFileBlob = await zip.file(attMeta.filePath).async("blob");
+                                    attMeta.fileData = (await readFileAsDataURL(attFileBlob)).fileData;
+                                    attMeta.fileType = attFileBlob.type || getMimeTypeFromName(attMeta.fileName);
+                                    delete attMeta.filePath;
                                 }
-                            });
-                        });
+                            }
+                            delete docMeta.id;
+                            docMeta.contentHash = await calculateFileHash(new File([mainFileBlob], docMeta.fileName, { type: docMeta.fileType }));
+                            
+                            // MODIFICA CHIAVE: Uso Crud.save per ogni documento per evitare il timeout della transazione
+                            await Crud.save(docMeta, false);
+
+                            // Pausa per permettere all'UI di aggiornarsi
+                            if (i % 5 === 0) {
+                                await new Promise(res => setTimeout(res, 1));
+                            }
+                        }
                         
                         importProgressText.textContent = "Finalizzazione...";
                         importProgressBar.style.width = '100%';
@@ -1537,4 +1528,5 @@
     </script>
 </body>
 </html>
+
 
