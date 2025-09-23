@@ -75,7 +75,6 @@
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-    <!-- Contenuto HTML (invariato) -->
     <div class="powered-by">Powered By Michele Rosati</div>
 
     <!-- Sidebar a scomparsa per i filtri -->
@@ -895,7 +894,7 @@
                             case 'year_asc': return a.year - b.year;
                             case 'year_desc': return b.year - a.year;
                             case 'date_asc': return a.uploadDate - b.uploadDate;
-                            default: return b.uploadDate - b.uploadDate;
+                            default: return b.uploadDate - a.uploadDate;
                         }
                     });
                     fullFilteredDocs = filteredDocs;
@@ -1393,7 +1392,7 @@
 
             importBtn.addEventListener('click', () => importFileInput.click());
             
-            // MODIFICATO: Gestione dell'importazione con barra di avanzamento
+            // Gestione dell'importazione con barra di avanzamento
             importFileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
