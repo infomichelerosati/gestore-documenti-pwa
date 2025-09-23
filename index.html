@@ -819,34 +819,33 @@
                 }
             }
             
-            // =====================================================================
-            // MODIFICA: Funzione per renderizzare PDF (multi-pagina e alta qualità)
-            // =====================================================================
             async function renderPdfToCanvas(container, fileData, options = {}) {
-                container.innerHTML = ''; // Pulisce il contenitore
+                container.innerHTML = ''; 
                 try {
                     const pdfjsLib = getPdfjsLib();
                     if (!pdfjsLib) throw new Error("PDF.js library not found");
 
                     const typedarray = new Uint8Array(atob(fileData.split(',')[1]).split('').map(char => char.charCodeAt(0)));
                     const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                    
+                    const pagesToRender = options.isThumbnail ? 1 : pdf.numPages;
 
-                    // Itera su tutte le pagine del PDF
-                    for (let i = 1; i <= pdf.numPages; i++) {
+                    for (let i = 1; i <= pagesToRender; i++) {
                         const page = await pdf.getPage(i);
-                        const scale = 1.5; // Aumenta la scala per una migliore qualità
+                        const scale = options.isThumbnail ? 1.0 : 1.5; 
                         const viewport = page.getViewport({ scale: scale });
                         
                         const canvas = document.createElement('canvas');
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
 
-                        // Stile per visualizzare correttamente il canvas nel contenitore
                         canvas.style.width = '100%';
                         canvas.style.height = 'auto';
                         canvas.style.display = 'block';
-                        canvas.style.marginBottom = '8px';
-                        canvas.style.borderRadius = '4px';
+                        if (!options.isThumbnail) {
+                            canvas.style.marginBottom = '8px';
+                            canvas.style.borderRadius = '4px';
+                        }
                         
                         container.appendChild(canvas);
 
@@ -877,14 +876,8 @@
                     const fileType = file.type || getMimeTypeFromName(file.name);
                     if (fileType.startsWith('image/')) previewEl.innerHTML = `<img src="${e.target.result}" class="max-w-full max-h-40 h-auto rounded-md mx-auto">`;
                     else if (fileType === 'application/pdf') {
-                         // Per la piccola anteprima nel form, basta la prima pagina
-                        previewEl.innerHTML = `<canvas class="max-w-full h-auto rounded-md mx-auto"></canvas>`;
-                        const singlePageContainer = {
-                            appendChild: (canvas) => previewEl.innerHTML = '', // clear and replace
-                            _canvas: null,
-                            get querySelectorAll() { return () => [this._canvas] }, // fake for print
-                        };
-                         renderPdfToCanvas(previewEl, e.target.result);
+                         previewEl.innerHTML = `<div class="w-full h-full"></div>`;
+                         renderPdfToCanvas(previewEl.firstElementChild, e.target.result, { isThumbnail: true });
 
                     } else {
                         previewEl.innerHTML = `<div class="text-center p-4"><i data-lucide="file-text" class="mx-auto h-16 w-16 text-gray-400"></i><p class="mt-2 text-sm text-gray-600 dark:text-gray-300 truncate">${file.name}</p></div>`;
@@ -964,18 +957,10 @@
                 let previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="file-text" class="w-12 h-12 text-gray-400"></i></div>`;
                 if (doc.fileType?.startsWith('image/')) previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><img src="${doc.fileData}" class="w-full h-full object-cover" alt="Anteprima"></div>`;
                 else if (doc.fileType === 'application/pdf') {
-                    previewHTML = `<div class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"><canvas id="pdf-canvas-${doc.id}" class="max-w-full max-h-full"></canvas></div>`;
+                    previewHTML = `<div id="pdf-thumb-container-${doc.id}" class="w-full h-32 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"></div>`;
                     setTimeout(() => {
-                         const canvas = document.getElementById(`pdf-canvas-${doc.id}`);
-                         if (canvas) {
-                             const singlePageContainer = { appendChild: (c) => {
-                                 const ctx = canvas.getContext('2d');
-                                 canvas.width = c.width;
-                                 canvas.height = c.height;
-                                 ctx.drawImage(c, 0, 0);
-                             }};
-                             renderPdfToCanvas(singlePageContainer, doc.fileData, { isThumbnail: true });
-                         }
+                         const container = document.getElementById(`pdf-thumb-container-${doc.id}`);
+                         if (container) renderPdfToCanvas(container, doc.fileData, { isThumbnail: true });
                     }, 0);
                 }
                 card.innerHTML = `${previewHTML}<div class="p-3 flex-grow flex flex-col"><h3 class="font-semibold text-sm truncate flex-grow" title="${doc.displayName}">${doc.displayName}</h3><p class="text-xs text-gray-500 truncate">${doc.category} / ${doc.subcategory}</p></div>`;
@@ -1079,9 +1064,6 @@
                 });
             }
             
-            // =====================================================================
-            // MODIFICA: Funzione di rendering anteprima che usa il nuovo renderer PDF
-            // =====================================================================
             const renderPreviewContent = async (fileData, fileType, fileName) => {
                 previewContent.innerHTML = `<div class="text-white"><div class="ocr-loader mx-auto"></div><p class="mt-2">Caricamento anteprima...</p></div>`;
                 try {
@@ -1092,11 +1074,10 @@
                         previewContent.innerHTML = ''; previewContent.appendChild(img);
                     } else if (fileType === 'application/pdf') {
                         const pdfContainer = document.createElement('div');
-                        // Questo contenitore conterrà tutte le pagine del PDF e sarà scorrevole
                         pdfContainer.className = "w-full h-full overflow-y-auto pdf-preview-container flex flex-col items-center p-4";
                         previewContent.innerHTML = '';
                         previewContent.appendChild(pdfContainer);
-                        await renderPdfToCanvas(pdfContainer, fileData); // Chiama la nuova funzione
+                        await renderPdfToCanvas(pdfContainer, fileData);
                     } else if (fileType.endsWith('.document') || fileName.endsWith('.docx')) {
                         const docContainer = document.createElement('div');
                         docContainer.className = "bg-white p-8 rounded-md w-full h-full overflow-y-auto text-black";
@@ -1181,7 +1162,7 @@
                 el.textContent = message;
                 el.style.backgroundColor = isError ? '#ef4444' : ''; 
                 el.style.opacity = '1';
-                setTimeout(() => { el.style.opacity = '0'; }, 3000);
+                setTimeout(() => { el.style.opacity = '0'; el.style.backgroundColor = '' }, 3000);
             }
             
             const openModal = (modalEl) => modalEl.classList.remove('hidden');
@@ -1268,20 +1249,50 @@
                 }
             });
 
+            // =====================================================================
+            // BUG FIX: Gestione robusta del submit e dei duplicati
+            // =====================================================================
             docForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const saveButton = e.submitter || docForm.querySelector('button[type="submit"]');
                 const originalButtonHTML = saveButton.innerHTML;
-                saveButton.disabled = true; saveButton.innerHTML = `<div class="ocr-loader mx-auto"></div>`;
-                try {
-                    let fileHash = null;
-                    if (fileInput.files[0]) {
+                saveButton.disabled = true;
+                saveButton.innerHTML = `<div class="ocr-loader mx-auto"></div>`;
+
+                const restoreSaveButton = () => {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = originalButtonHTML;
+                };
+
+                // 1. Controlla se è stato selezionato un file (necessario solo per nuovi documenti)
+                if (!editingDocId && !fileInput.files[0]) {
+                    showSnackbar("Per favore, seleziona un file principale.", true);
+                    restoreSaveButton();
+                    return;
+                }
+
+                let fileHash = null;
+                // 2. Controllo duplicati (eseguito solo se è stato fornito un nuovo file)
+                if (fileInput.files[0]) {
+                    try {
                         fileHash = await calculateFileHash(fileInput.files[0]);
                         const existingDoc = await checkForDuplicate(fileHash);
+                        // Se il documento esiste e non stiamo modificando quello stesso documento
                         if (existingDoc && (!editingDocId || existingDoc.id != editingDocId)) {
-                            throw new Error(`Questo file esiste già: "${existingDoc.displayName}"`);
+                            showSnackbar(`Questo file esiste già nell'archivio: "${existingDoc.displayName}"`, true);
+                            restoreSaveButton();
+                            return; // Interrompe l'esecuzione qui, l'utente può correggere o annullare
                         }
+                    } catch (error) {
+                         console.error("Errore durante il controllo hash del file:", error);
+                         showSnackbar("Impossibile verificare il file. Riprova.", true);
+                         restoreSaveButton();
+                         return;
                     }
+                }
+
+                // 3. Se tutti i controlli preliminari sono superati, si procede con il salvataggio.
+                try {
                     const processSubmit = async (baseDoc) => {
                         const newAttachments = await Promise.all(attachmentsToAdd.map(readFileAsDataURL));
                         baseDoc.attachments = [...(baseDoc.attachments || []), ...newAttachments];
@@ -1293,12 +1304,13 @@
                             uploadDate: editingDocId ? baseDoc.uploadDate : new Date().getTime(),
                         };
                         if (fileHash) docData.contentHash = fileHash;
-                        await Crud.save(docData);
+                        await Crud.save(docData); // Questo chiuderà il modal in caso di successo
                     };
+
                     if (editingDocId) {
                         await new Promise((resolve, reject) => Crud.get(editingDocId, async (doc) => {
                             try {
-                                if (!doc) return reject(new Error("Doc da modificare non trovato."));
+                                if (!doc) return reject(new Error("Documento da modificare non trovato."));
                                 let docToProcess = { ...doc };
                                 if (fileInput.files[0]) {
                                     const { fileData, fileName, fileType } = await readFileAsDataURL(fileInput.files[0]);
@@ -1309,15 +1321,15 @@
                             } catch (err) { reject(err); }
                         }));
                     } else {
-                        if (!fileInput.files[0]) throw new Error("Seleziona un file principale.");
+                        // A questo punto, sappiamo che fileInput.files[0] esiste grazie al controllo iniziale
                         const { fileData, fileName, fileType } = await readFileAsDataURL(fileInput.files[0]);
                         await processSubmit({ fileData, fileName, fileType, attachments: [] });
                     }
                 } catch (error) {
+                    // Questo blocco catch gestisce solo errori reali durante il salvataggio (es. problemi DB)
                     console.error("Errore salvataggio:", error);
-                    showSnackbar(error.message || "Errore nel salvataggio.", true);
-                } finally {
-                    saveButton.disabled = false; saveButton.innerHTML = originalButtonHTML;
+                    showSnackbar(error.message || "Errore nel salvataggio del documento.", true);
+                    restoreSaveButton(); // Ripristina il pulsante anche in caso di errore
                 }
             });
             
@@ -1367,13 +1379,9 @@
 
             closePreviewBtn.addEventListener('click', () => closeModal(previewModal));
             
-            // =====================================================================
-            // MODIFICA: Gestione della stampa per PDF multi-pagina
-            // =====================================================================
             printBtn.addEventListener('click', () => {
                 const pdfContainer = previewContent.querySelector('.pdf-preview-container');
                 if (pdfContainer && pdfContainer.querySelectorAll('canvas').length > 0) {
-                    // Gestione stampa per PDF multi-pagina
                     const printWindow = window.open('', '_blank');
                     let imagesHTML = '';
                     pdfContainer.querySelectorAll('canvas').forEach(canvas => {
@@ -1387,17 +1395,21 @@
                         printWindow.close();
                     }, 500);
                 } else {
-                    // Logica originale per altri tipi di file
                     const contentEl = previewContent.querySelector('img, div.docx-wrapper, div.excel-preview-container');
                     if (contentEl) {
                         const printWindow = window.open('', '_blank');
                         if(contentEl.matches('img')) {
                             printWindow.document.write(`<html><body style="text-align:center;"><img src="${contentEl.src}" style="max-width:100%;" onload="window.print();window.close();"></body></html>`);
                         } else {
-                            printWindow.document.write('<html><head><title>Stampa Documento</title></head><body>' + contentEl.innerHTML + '</body></html>');
+                            const styles = Array.from(document.styleSheets).map(s => s.href ? `<link rel="stylesheet" href="${s.href}">` : `<style>${Array.from(s.cssRules).map(r => r.cssText).join('')}</style>`).join('');
+                            printWindow.document.write(`<html><head><title>Stampa Documento</title>${styles}</head><body><div class="excel-preview-container">${contentEl.innerHTML}</div></body></html>`);
                         }
                         printWindow.document.close();
                         printWindow.focus();
+                        setTimeout(() => {
+                           printWindow.print();
+                           printWindow.close();
+                        }, 500);
                     } else showSnackbar("Stampa non disponibile per questo file.", true);
                 }
             });
@@ -1591,4 +1603,3 @@
     </script>
 </body>
 </html>
-
